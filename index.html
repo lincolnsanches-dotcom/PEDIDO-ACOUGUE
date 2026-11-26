@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Controle de Pedidos do Açougue — Cozinha &amp; Secretaria</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -190,8 +191,8 @@
             Copiar Lista p/ Secretaria
           </button>
           <span id="save-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-madeira-100 text-madeira-800 border border-madeira-200">
-            <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-            Salvo automaticamente
+            <span id="save-status-dot" class="w-2 h-2 rounded-full bg-emerald-600"></span>
+            <span id="save-status-text">Sincronizado na nuvem</span>
           </span>
           <button
             type="button"
@@ -738,6 +739,55 @@
   <script>
     /**
      * =========================================================================
+     * 0. CONFIGURAÇÃO SUPABASE (PROJETO edmhikqesjbpwfwxlhsw)
+     * =========================================================================
+     */
+    const SUPABASE_URL = 'https://edmhikqesjbpwfwxlhsw.supabase.co';
+    const SUPABASE_PUBLIC_KEY = 'sb_publishable_BvIdvm8H8OHplguTCcOx8w_f3VCLknV';
+    const SUPABASE_TABLE = 'pedidos_acougue';
+    const SUPABASE_ROW_ID = 'estado_atual';
+
+    let sbClient = null;
+    let saveTimer = null;
+    let isRemoteUpdating = false;
+
+    function initSupabaseClient() {
+      if (
+        window.supabase &&
+        typeof window.supabase.createClient === 'function' &&
+        SUPABASE_PUBLIC_KEY &&
+        SUPABASE_PUBLIC_KEY !== 'COLE_AQUI_A_SUA_CHAVE_PUBLICA'
+      ) {
+        sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+        return true;
+      }
+      sbClient = null;
+      return false;
+    }
+
+    function setSyncStatus(mode, customText) {
+      const badge = document.getElementById('save-status-badge');
+      const dot = document.getElementById('save-status-dot');
+      const text = document.getElementById('save-status-text');
+      if (!badge || !dot || !text) return;
+
+      if (mode === 'saving') {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
+        text.textContent = customText || 'Salvando no Supabase...';
+      } else if (mode === 'error') {
+        dot.className = 'w-2 h-2 rounded-full bg-red-600';
+        text.textContent = customText || 'Erro ao sincronizar';
+      } else if (mode === 'unconfigured') {
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+        text.textContent = customText || 'Configure a chave pública';
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-600';
+        text.textContent = customText || 'Sincronizado na nuvem';
+      }
+    }
+
+    /**
+     * =========================================================================
      * 1. BASE DE 75 CÓDIGOS (Pasta1.xlsx)
      * =========================================================================
      */
@@ -1075,7 +1125,7 @@
 
     /**
      * =========================================================================
-     * 3. ESTADO E PERSISTÊNCIA (CHAVE pedido_acougue_hotel_state_v6)
+     * 3. ESTADO E PERSISTÊNCIA NO SUPABASE (TABELA pedidos_acougue)
      * =========================================================================
      */
     const STORAGE_KEY = 'pedido_acougue_hotel_state_v6';
@@ -1092,36 +1142,152 @@
       };
     }
 
-    function loadState() {
+    function normalizeState(parsed) {
+      const fallback = cloneDefaultState();
+      if (!parsed || typeof parsed !== 'object') return fallback;
+      return {
+        ...fallback,
+        ...parsed,
+        catalog: Array.isArray(parsed.catalog) && parsed.catalog.length > 0 ? parsed.catalog : fallback.catalog,
+        checklist: parsed.checklist && typeof parsed.checklist === 'object' ? parsed.checklist : fallback.checklist,
+        consolidadoDays: Array.isArray(parsed.consolidadoDays) ? parsed.consolidadoDays : fallback.consolidadoDays
+      };
+    }
+
+    function loadLocalFallbackState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return cloneDefaultState();
-        const parsed = JSON.parse(raw);
-        const fallback = cloneDefaultState();
-        return {
-          ...fallback,
-          ...parsed,
-          catalog: Array.isArray(parsed.catalog) && parsed.catalog.length > 0 ? parsed.catalog : fallback.catalog,
-          checklist: parsed.checklist && typeof parsed.checklist === 'object' ? parsed.checklist : fallback.checklist,
-          consolidadoDays: Array.isArray(parsed.consolidadoDays) ? parsed.consolidadoDays : fallback.consolidadoDays
-        };
+        return normalizeState(JSON.parse(raw));
       } catch (err) {
-        console.error('Erro ao ler localStorage:', err);
+        console.error('Erro ao ler estado inicial:', err);
         return cloneDefaultState();
       }
     }
 
-    let state = loadState();
+    let state = loadLocalFallbackState();
+
+    async function persistToSupabaseNow() {
+      if (!sbClient) {
+        setSyncStatus('unconfigured', 'Chave pública pendente');
+        return;
+      }
+
+      setSyncStatus('saving', 'Salvando no Supabase...');
+      const payload = {
+        id: SUPABASE_ROW_ID,
+        dados: {
+          weekReference: state.weekReference,
+          activeTab: state.activeTab,
+          activeDay: state.activeDay,
+          onlyUnmapped: state.onlyUnmapped,
+          consolidadoDays: state.consolidadoDays,
+          catalog: state.catalog,
+          checklist: state.checklist
+        },
+        atualizado_em: new Date().toISOString()
+      };
+
+      const { error } = await sbClient
+        .from(SUPABASE_TABLE)
+        .upsert(payload, { onConflict: 'id' });
+
+      if (error) {
+        console.error('Erro ao salvar no Supabase:', error);
+        setSyncStatus('error', 'Erro ao salvar nuvem');
+        showToast('Erro ao salvar no Supabase. Verifique a chave pública e as permissões da tabela.', 'error');
+      } else {
+        setSyncStatus('synced', 'Sincronizado na nuvem');
+      }
+    }
 
     function saveState() {
+      updateCatalogCountBadge();
+      updateUnmappedBadge();
+
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        updateCatalogCountBadge();
-        updateUnmappedBadge();
-      } catch (err) {
-        console.error('Erro ao salvar no localStorage:', err);
-        showToast('Aviso: não foi possível salvar no navegador.', 'error');
+      } catch (_) {
+        // Ignora erro de quota local; a fonte principal é o Supabase
       }
+
+      if (isRemoteUpdating) return;
+
+      if (!sbClient) {
+        setSyncStatus('unconfigured', 'Chave pública pendente');
+        return;
+      }
+
+      setSyncStatus('saving', 'Salvando...');
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        persistToSupabaseNow();
+      }, 250);
+    }
+
+    async function loadStateFromSupabase() {
+      const ready = initSupabaseClient();
+      if (!ready) {
+        setSyncStatus('unconfigured', 'Chave pública pendente');
+        showToast('Cole a chave pública do Supabase em SUPABASE_PUBLIC_KEY no index.html para sincronizar entre aparelhos.', 'warning');
+        return;
+      }
+
+      setSyncStatus('saving', 'Carregando nuvem...');
+      const { data, error } = await sbClient
+        .from(SUPABASE_TABLE)
+        .select('dados')
+        .eq('id', SUPABASE_ROW_ID)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Erro ao carregar do Supabase:', error);
+        setSyncStatus('error', 'Erro ao ler nuvem');
+        showToast('Não foi possível ler os dados do Supabase.', 'error');
+        return;
+      }
+
+      if (data && data.dados) {
+        isRemoteUpdating = true;
+        state = normalizeState(data.dados);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (_) {}
+        isRemoteUpdating = false;
+        renderAll();
+        setSyncStatus('synced', 'Sincronizado na nuvem');
+      } else {
+        await persistToSupabaseNow();
+      }
+    }
+
+    function subscribeToRealtimeChanges() {
+      if (!sbClient || typeof sbClient.channel !== 'function') return;
+
+      sbClient
+        .channel('pedidos-acougue-sync')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: SUPABASE_TABLE,
+            filter: `id=eq.${SUPABASE_ROW_ID}`
+          },
+          (payload) => {
+            const newDados = payload?.new?.dados;
+            if (!newDados) return;
+            isRemoteUpdating = true;
+            state = normalizeState(newDados);
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (_) {}
+            renderAll();
+            setSyncStatus('synced', 'Atualizado ao vivo');
+            isRemoteUpdating = false;
+          }
+        )
+        .subscribe();
     }
 
     /**
@@ -2218,8 +2384,10 @@
       switchTab(state.activeTab || 'lancamento');
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       renderAll();
+      await loadStateFromSupabase();
+      subscribeToRealtimeChanges();
     });
   </script>
 </body>
