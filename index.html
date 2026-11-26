@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Pedidos do Açougue — Cozinha &amp; Secretaria</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            bourbon: {
+              50: '#eaf4f2',
+              100: '#d1e6e2',
+              200: '#a3cbc4',
+              300: '#6ea99f',
+              400: '#3f867b',
+              500: '#23695f',
+              600: '#16554d',
+              700: '#0b4d46',
+              800: '#00463f',
+              900: '#003630',
+            },
+            terracotta: {
+              50: '#eaf4f2',
+              100: '#d1e6e2',
+              200: '#a3cbc4',
+              300: '#6ea99f',
+              400: '#3f867b',
+              500: '#16554d',
+              600: '#00463f',
+              700: '#00463f',
+              800: '#003630',
+              900: '#002723',
+            },
+            vinho: {
+              50: '#eaf4f2',
+              100: '#d1e6e2',
+              200: '#a3cbc4',
+              300: '#6ea99f',
+              400: '#3f867b',
+              500: '#16554d',
+              600: '#00463f',
+              700: '#00463f',
+              800: '#00463f',
+              900: '#003630',
+            },
+            madeira: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00463f;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 12mm;
+      }
+
+      body {
+        background-color: #ffffff !important;
+        color: #111827 !important;
+        font-size: 11pt;
+      }
+
+      .no-print,
+      header,
+      nav,
+      #toast-container,
+      #modal-container {
+        display: none !important;
+      }
+
+      #print-area {
+        display: block !important;
+        width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .print-card {
+        box-shadow: none !important;
+        border: 1px solid #d1d5db !important;
+        break-inside: avoid;
+      }
+
+      table {
+        page-break-inside: auto;
+      }
+
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+
+      thead {
+        display: table-header-group;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-madeira-50 text-madeira-900">
+
+  <!-- Cabeçalho Principal -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-madeira-200 shadow-sm no-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <!-- Logo e Título -->
+        <div class="flex items-center gap-3.5">
+          <div id="header-logo-wrapper" class="h-14 flex items-center justify-center overflow-visible shrink-0">
+            <img
+              id="brand-logo-img"
+              src="./logo.png"
+              alt="Logo do Hotel / Açougue"
+              class="h-14 w-auto max-w-[140px] object-contain"
+              onerror="handleLogoError(this)"
+            />
+            <div id="brand-logo-fallback" class="hidden w-16 h-14 rounded-xl bg-[#00463f] text-white flex flex-col items-center justify-center select-none">
+              <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/>
+                <line x1="6" y1="17" x2="18" y2="17"/>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-vinho-900">
+                Controle de Pedidos do Açougue
+              </h1>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-terracotta-100 text-terracotta-800 border border-terracotta-200">
+                Cozinha &amp; Secretaria
+              </span>
+            </div>
+            <p class="text-xs sm:text-sm text-madeira-700">
+              Demanda diária por turno (Almoço / Jantar), consolidação automática e códigos para solicitação de compras
+            </p>
+          </div>
+        </div>
+
+        <!-- Botões de Ação e Status -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onclick="copyConsolidatedForSecretariat()"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-vinho-900 bg-vinho-50 hover:bg-vinho-100 border border-vinho-200 transition cursor-pointer"
+          >
+            Copiar Lista p/ Secretaria
+          </button>
+          <span id="save-status-badge" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-madeira-100 text-madeira-800 border border-madeira-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+            Salvo automaticamente
+          </span>
+          <button
+            type="button"
+            onclick="loadFullStandardSchedule(false)"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-terracotta-900 bg-terracotta-50 hover:bg-terracotta-100 border border-terracotta-200 transition cursor-pointer"
+            title="Carregar padrão completo com todos os 173 itens dos 7 dias"
+          >
+            Carregar Padrão Completo (173 itens)
+          </button>
+          <button
+            type="button"
+            onclick="openResetModal()"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-madeira-800 bg-madeira-100 hover:bg-madeira-200 border border-madeira-300 transition cursor-pointer"
+          >
+            Restaurar Planilhas
+          </button>
+        </div>
+      </div>
+
+      <!-- Abas Principais -->
+      <nav class="mt-3 flex gap-1.5 sm:gap-2 overflow-x-auto pb-0.5" aria-label="Abas principais">
+        <button
+          id="tab-btn-lancamento"
+          type="button"
+          onclick="switchTab('lancamento')"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer bg-vinho-800 text-white shadow-xs"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          1. Lançamento Dia / Turno
+        </button>
+
+        <button
+          id="tab-btn-consolidado"
+          type="button"
+          onclick="switchTab('consolidado')"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer bg-madeira-100 text-madeira-800 hover:bg-madeira-200"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </svg>
+          2. Consolidado para Impressão
+          <span id="unmapped-badge" class="hidden ml-1 px-2 py-0.5 text-[11px] font-bold rounded-full bg-amber-100 text-amber-900 border border-amber-300"></span>
+        </button>
+
+        <button
+          id="tab-btn-codigos"
+          type="button"
+          onclick="switchTab('codigos')"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer bg-madeira-100 text-madeira-800 hover:bg-madeira-200"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+          3. Base de Códigos ( <span id="catalog-count-label">75</span> )
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ABA 1: LANÇAMENTO DIA / TURNO -->
+    <section id="view-lancamento" class="space-y-6 no-print">
+      <!-- Seletor dos 7 Dias -->
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs p-4 sm:p-5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-madeira-900">Selecione o Dia da Semana</h2>
+            <p class="text-xs sm:text-sm text-madeira-600">
+              Todos os 173 itens de <strong>ALMOÇO</strong> e <strong>JANTAR</strong> da planilha original são exibidos divididos por dia e turno.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <label for="week-reference-input" class="text-xs font-semibold text-madeira-700">Semana / Ciclo:</label>
+            <input
+              id="week-reference-input"
+              type="text"
+              onchange="updateMetaField('weekReference', this.value)"
+              placeholder="Ex.: Semana 01 - Novembro"
+              class="px-3 py-1.5 rounded-xl text-xs sm:text-sm border border-madeira-300 bg-madeira-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+            />
+          </div>
+        </div>
+
+        <div id="days-selector-grid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2"></div>
+      </div>
+
+      <!-- Cards de Hóspedes + Resumo do Dia -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-8 bg-white rounded-2xl border border-madeira-200 shadow-xs p-4 sm:p-5 flex flex-col justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-terracotta-700">Dia Selecionado</span>
+              <h3 id="current-day-heading" class="text-lg sm:text-xl font-extrabold text-madeira-900">SEGUNDA-FEIRA</h3>
+            </div>
+            <span id="current-day-items-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-madeira-100 text-madeira-800 border border-madeira-200 self-start sm:self-auto">
+              25 itens no dia (12 Almoço • 13 Jantar)
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-madeira-100">
+            <div class="bg-amber-50/70 border border-amber-200/80 rounded-xl p-3">
+              <label for="guests-almoco-input" class="block text-xs font-bold text-amber-900 mb-1">
+                Previsão de Hóspedes — ALMOÇO
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  id="guests-almoco-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  oninput="updateGuests('ALMOCO', this.value)"
+                  placeholder="0"
+                  class="w-full px-3 py-2 rounded-xl bg-white border border-amber-300 text-sm font-bold text-madeira-900 focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+                />
+                <span class="text-xs font-semibold text-amber-800 shrink-0">hóspedes</span>
+              </div>
+            </div>
+
+            <div class="bg-vinho-50/70 border border-vinho-200/80 rounded-xl p-3">
+              <label for="guests-jantar-input" class="block text-xs font-bold text-vinho-900 mb-1">
+                Previsão de Hóspedes — JANTAR
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  id="guests-jantar-input"
+                  type="number"
+                  min="0"
+                  step="1"
+                  oninput="updateGuests('JANTAR', this.value)"
+                  placeholder="0"
+                  class="w-full px-3 py-2 rounded-xl bg-white border border-vinho-300 text-sm font-bold text-madeira-900 focus:outline-none focus:ring-2 focus:ring-vinho-600"
+                />
+                <span class="text-xs font-semibold text-vinho-800 shrink-0">hóspedes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-4 bg-[#00463f] text-white rounded-2xl shadow-sm p-5 flex flex-col justify-between">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-madeira-200">Resumo do Dia</span>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span class="text-3xl font-extrabold" id="day-total-kg">0,00</span>
+              <span class="text-sm font-semibold text-madeira-200">KG no dia</span>
+            </div>
+            <p class="text-xs text-madeira-200/90 mt-1" id="day-shifts-breakdown">
+              Almoço: 0,00 kg • Jantar: 0,00 kg
+            </p>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-white/15 flex items-center justify-between gap-2">
+            <span id="day-unmapped-warning" class="text-xs font-medium text-amber-200"></span>
+            <button
+              type="button"
+              onclick="switchTab('consolidado')"
+              class="px-3.5 py-2 rounded-xl bg-white text-vinho-900 hover:bg-madeira-100 text-xs font-bold transition cursor-pointer shrink-0 shadow-xs"
+            >
+              Ver Consolidado →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra de Adição e Filtros -->
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs p-4 sm:p-5">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div class="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <div class="sm:col-span-5">
+              <label for="add-item-select" class="block text-xs font-bold text-madeira-800 mb-1">
+                Adicionar Item da Base de Códigos
+              </label>
+              <select
+                id="add-item-select"
+                class="w-full px-3 py-2.5 rounded-xl border border-madeira-300 bg-madeira-50 text-sm text-madeira-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+              ></select>
+            </div>
+
+            <div class="sm:col-span-3">
+              <label for="add-item-shift" class="block text-xs font-bold text-madeira-800 mb-1">
+                Turno de Destino
+              </label>
+              <select
+                id="add-item-shift"
+                class="w-full px-3 py-2.5 rounded-xl border border-madeira-300 bg-madeira-50 text-sm text-madeira-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+              >
+                <option value="ALMOCO">Almoço</option>
+                <option value="JANTAR">Jantar</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="add-item-qty" class="block text-xs font-bold text-madeira-800 mb-1">
+                Quantidade
+              </label>
+              <input
+                id="add-item-qty"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Ex.: 8.5"
+                class="w-full px-3 py-2.5 rounded-xl border border-madeira-300 bg-madeira-50 text-sm font-semibold text-madeira-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+              />
+            </div>
+
+            <div class="sm:col-span-2 flex items-end">
+              <button
+                type="button"
+                onclick="handleAddCatalogItemToDay()"
+                class="w-full px-4 py-2.5 rounded-xl bg-terracotta-600 hover:bg-terracotta-700 text-white text-sm font-bold shadow-xs transition cursor-pointer"
+              >
+                + Incluir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-madeira-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="relative flex-1 max-w-md">
+            <input
+              id="day-search-input"
+              type="text"
+              oninput="renderDayItems()"
+              placeholder="Buscar proteína no checklist do dia ou código..."
+              class="w-full pl-9 pr-3 py-2 rounded-xl border border-madeira-300 bg-madeira-50 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+            />
+            <svg class="w-4 h-4 text-madeira-500 absolute left-3 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <button
+              type="button"
+              id="filter-unmapped-btn"
+              onclick="toggleOnlyUnmappedFilter()"
+              class="px-3 py-1.5 rounded-xl font-semibold border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 transition cursor-pointer"
+            >
+              Mostrar apenas sem código definido
+            </button>
+            <button
+              type="button"
+              onclick="openCustomChecklistModal()"
+              class="px-3 py-1.5 rounded-xl font-semibold border border-madeira-300 bg-madeira-100 text-madeira-800 hover:bg-madeira-200 transition cursor-pointer"
+            >
+              + Item Avulso / Observação
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade dos Dois Turnos (ALMOÇO e JANTAR) -->
+      <div id="day-shifts-container" class="space-y-6"></div>
+    </section>
+
+    <!-- ABA 2: CONSOLIDADO PARA IMPRESSÃO -->
+    <section id="view-consolidado" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs p-4 sm:p-5 no-print">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-madeira-900">Consolidado para a Secretaria (Solicitação de Compras)</h2>
+            <p class="text-xs sm:text-sm text-madeira-600">
+              Agrupado por código de proteína com soma de Almoço, Jantar e Total Geral para lançamento no sistema de compras.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onclick="copyConsolidatedForSecretariat()"
+              class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-terracotta-50 hover:bg-terracotta-100 text-terracotta-900 border border-terracotta-200 transition cursor-pointer"
+            >
+              Copiar Texto p/ Secretaria
+            </button>
+            <button
+              type="button"
+              onclick="exportConsolidadoCSV()"
+              class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-madeira-100 hover:bg-madeira-200 text-madeira-900 border border-madeira-300 transition cursor-pointer"
+            >
+              Exportar CSV
+            </button>
+            <button
+              type="button"
+              onclick="triggerPrintReport()"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-vinho-800 hover:bg-vinho-900 text-white shadow-xs transition cursor-pointer"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Imprimir / Salvar PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-madeira-100">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <span class="text-xs font-bold uppercase tracking-wider text-madeira-700">Dias incluídos no consolidado (Semana ou Dia):</span>
+            <div class="flex items-center gap-2 text-xs">
+              <button type="button" onclick="selectAllConsolidadoDays(true)" class="text-terracotta-700 hover:underline font-semibold cursor-pointer">
+                Semana completa (7 dias)
+              </button>
+              <span class="text-madeira-400">•</span>
+              <button type="button" onclick="selectAllConsolidadoDays(false)" class="text-terracotta-700 hover:underline font-semibold cursor-pointer">
+                Limpar seleção
+              </button>
+            </div>
+          </div>
+          <div id="consolidado-days-toggles" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-madeira-100 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="consolidado-category-filter" class="block text-xs font-semibold text-madeira-700 mb-1">Categoria</label>
+            <select
+              id="consolidado-category-filter"
+              onchange="renderConsolidado()"
+              class="w-full px-3 py-2 rounded-xl border border-madeira-300 bg-madeira-50 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+            >
+              <option value="TODAS">Todas as categorias</option>
+              <option value="Carnes">Carnes</option>
+              <option value="Aves">Aves</option>
+              <option value="Peixes e Frutos Mar">Peixes e Frutos Mar</option>
+              <option value="Embutidos / Outros">Embutidos / Outros</option>
+              <option value="SEM_CODIGO">Sem código vinculado</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="consolidado-search-input" class="block text-xs font-semibold text-madeira-700 mb-1">Filtrar por Código ou Descrição</label>
+            <input
+              id="consolidado-search-input"
+              type="text"
+              oninput="renderConsolidado()"
+              placeholder="Ex.: 102035, picanha, salmão..."
+              class="w-full px-3 py-2 rounded-xl border border-madeira-300 bg-madeira-50 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+            />
+          </div>
+
+          <div class="flex items-end">
+            <label class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-madeira-50 border border-madeira-200 text-xs sm:text-sm font-medium text-madeira-800 cursor-pointer w-full">
+              <input
+                id="consolidado-only-positive"
+                type="checkbox"
+                checked
+                onchange="renderConsolidado()"
+                class="rounded border-madeira-400 text-terracotta-600 focus:ring-terracotta-500"
+              />
+              Exibir apenas itens com quantidade &gt; 0
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Área de Impressão -->
+      <div id="print-area" class="bg-white rounded-2xl border border-madeira-200 shadow-xs p-5 sm:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b-2 border-vinho-900">
+          <div class="flex items-center gap-4">
+            <div class="h-16 flex items-center justify-center overflow-visible shrink-0">
+              <img
+                src="./logo.png"
+                alt="Logo"
+                class="h-16 w-auto max-w-[160px] object-contain"
+                onerror="handleLogoError(this)"
+              />
+              <div class="hidden w-20 h-16 rounded-xl bg-[#00463f] text-white flex items-center justify-center text-xs font-extrabold">
+                AÇOUGUE
+              </div>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold uppercase tracking-widest text-terracotta-700">
+                Solicitação de Compras — Açougue / Cozinha
+              </p>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-vinho-900">
+                Consolidado de Proteínas por Código
+              </h3>
+              <p id="print-period-label" class="text-xs sm:text-sm text-madeira-700 mt-0.5"></p>
+            </div>
+          </div>
+
+          <div class="text-left sm:text-right text-xs text-madeira-700 space-y-1">
+            <div><span class="font-semibold">Emissão:</span> <span id="print-generated-at"></span></div>
+            <div><span class="font-semibold">Total de Hóspedes (Período):</span> <span id="print-total-guests" class="font-bold text-madeira-900">0</span></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="print-card rounded-xl bg-madeira-50 border border-madeira-200 p-3.5">
+            <span class="text-[11px] font-bold uppercase text-madeira-600">Total Almoço</span>
+            <p id="kpi-almoco-kg" class="text-lg sm:text-xl font-extrabold text-madeira-900 mt-1">0,00 KG</p>
+          </div>
+          <div class="print-card rounded-xl bg-madeira-50 border border-madeira-200 p-3.5">
+            <span class="text-[11px] font-bold uppercase text-madeira-600">Total Jantar</span>
+            <p id="kpi-jantar-kg" class="text-lg sm:text-xl font-extrabold text-madeira-900 mt-1">0,00 KG</p>
+          </div>
+          <div class="print-card rounded-xl bg-vinho-50 border border-vinho-200 p-3.5">
+            <span class="text-[11px] font-bold uppercase text-vinho-800">Total Geral</span>
+            <p id="kpi-total-kg" class="text-lg sm:text-xl font-extrabold text-vinho-900 mt-1">0,00 KG</p>
+          </div>
+          <div class="print-card rounded-xl bg-terracotta-50 border border-terracotta-200 p-3.5">
+            <span class="text-[11px] font-bold uppercase text-terracotta-800">Itens no Pedido</span>
+            <p id="kpi-items-count" class="text-lg sm:text-xl font-extrabold text-terracotta-900 mt-1">0</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b-2 border-madeira-300 bg-madeira-100/80 text-[11px] sm:text-xs font-extrabold uppercase tracking-wider text-madeira-800">
+                <th class="py-3 px-3 rounded-tl-xl">Código</th>
+                <th class="py-3 px-3">Descrição Oficial (Base de Códigos)</th>
+                <th class="py-3 px-3">Categoria</th>
+                <th class="py-3 px-3 text-right">Almoço</th>
+                <th class="py-3 px-3 text-right">Jantar</th>
+                <th class="py-3 px-3 text-right">Total Geral</th>
+                <th class="py-3 px-3 text-center">Unid.</th>
+                <th class="py-3 px-3 rounded-tr-xl">Obs. / Origem</th>
+              </tr>
+            </thead>
+            <tbody id="consolidado-table-body" class="divide-y divide-madeira-200 text-xs sm:text-sm"></tbody>
+          </table>
+        </div>
+
+        <div class="pt-8 mt-6 border-t border-madeira-200 grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs text-madeira-700">
+          <div>
+            <div class="border-b border-madeira-400 h-8 mb-1.5"></div>
+            <p class="font-semibold text-madeira-900">Chef de Cozinha / Açougue</p>
+            <p class="text-[11px] text-madeira-500">Conferência da demanda por dia e turno</p>
+          </div>
+          <div>
+            <div class="border-b border-madeira-400 h-8 mb-1.5"></div>
+            <p class="font-semibold text-madeira-900">Secretaria / Compras</p>
+            <p class="text-[11px] text-madeira-500">Lançamento dos códigos no sistema de SC</p>
+          </div>
+          <div>
+            <div class="border-b border-madeira-400 h-8 mb-1.5"></div>
+            <p class="font-semibold text-madeira-900">Nº Solicitação de Compras / Data</p>
+            <p class="text-[11px] text-madeira-500">Protocolo interno de aprovação</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 3: BASE DE CÓDIGOS -->
+    <section id="view-codigos" class="hidden space-y-6 no-print">
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs p-4 sm:p-5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-madeira-900">Base de Códigos de Proteínas (Pasta1.xlsx)</h2>
+            <p class="text-xs sm:text-sm text-madeira-600">
+              Consulte, edite ou adicione códigos utilizados pela secretaria para lançar a solicitação de compras.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onclick="openCatalogItemModal()"
+              class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-terracotta-600 hover:bg-terracotta-700 text-white transition cursor-pointer"
+            >
+              + Novo Código
+            </button>
+            <button
+              type="button"
+              onclick="exportCatalogJSON()"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-madeira-100 hover:bg-madeira-200 text-madeira-900 border border-madeira-300 transition cursor-pointer"
+            >
+              Exportar JSON
+            </button>
+            <label class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-madeira-100 hover:bg-madeira-200 text-madeira-900 border border-madeira-300 transition cursor-pointer">
+              Importar JSON/CSV
+              <input type="file" accept=".json,.csv" onchange="handleImportCatalogFile(event)" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-madeira-100 flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <input
+              id="catalog-search-input"
+              type="text"
+              oninput="renderCatalogTable()"
+              placeholder="Pesquisar por código, nome do corte ou embalagem..."
+              class="w-full pl-9 pr-3 py-2 rounded-xl border border-madeira-300 bg-madeira-50 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+            />
+            <svg class="w-4 h-4 text-madeira-500 absolute left-3 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+
+          <select
+            id="catalog-category-filter"
+            onchange="renderCatalogTable()"
+            class="px-3 py-2 rounded-xl border border-madeira-300 bg-madeira-50 text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+          >
+            <option value="TODAS">Todas as categorias</option>
+            <option value="Carnes">Carnes</option>
+            <option value="Aves">Aves</option>
+            <option value="Peixes e Frutos Mar">Peixes e Frutos Mar</option>
+            <option value="Embutidos / Outros">Embutidos / Outros</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-madeira-200 bg-madeira-100/80 text-xs font-extrabold uppercase tracking-wider text-madeira-800">
+                <th class="py-3 px-4">Código</th>
+                <th class="py-3 px-4">Descrição</th>
+                <th class="py-3 px-4">Categoria</th>
+                <th class="py-3 px-4 text-center">Unid.</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="catalog-table-body" class="divide-y divide-madeira-100 text-xs sm:text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast & Modal -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+  <div id="modal-container" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-xs p-4 no-print">
+    <div id="modal-box" class="bg-white rounded-2xl border border-madeira-200 shadow-xl max-w-lg w-full p-5 sm:p-6 space-y-4"></div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * 1. BASE DE 75 CÓDIGOS (Pasta1.xlsx)
+     * =========================================================================
+     */
+    const INITIAL_CATALOG = [
+      // Carnes (32)
+      { code: '102001', description: 'ALCATRA MIOLO / Cx 20kg', category: 'Carnes', unit: 'KG' },
+      { code: '102076', description: 'BISTECA SUINA SEM PELE / cx 18 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102117', description: 'CARNE SECA / Cx 30 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102009', description: 'COELHO CONGELADO', category: 'Carnes', unit: 'KG' },
+      { code: '102003', description: 'CONTRA FILET SEM OSSO / Cx 20kg', category: 'Carnes', unit: 'KG' },
+      { code: '102080', description: 'COSTELA BOVINA INTEIRA / Cx 20kg', category: 'Carnes', unit: 'KG' },
+      { code: '102011', description: 'COSTELA SUINA FRESCA / Cx 18kg', category: 'Carnes', unit: 'KG' },
+      { code: '102012', description: 'COSTELINHA SUINA DEF. / cx 15 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102082', description: 'COXÃO DURO / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102013', description: 'COXÃO MOLE PEÇA INT / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102083', description: 'CUPIM / Pç 6 kg / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102037', description: 'FILET MIGNON S/ CORDAO / cx 15 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102014', description: 'FRALDINHA / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102093', description: 'FRANCHED RACK/OVINO / cx 7 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102120', description: 'LINGUA SUINA SALGADA / cx 5kg', category: 'Carnes', unit: 'KG' },
+      { code: '102019', description: 'LOMBO SUINO S/PELE / cx 15 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102071', description: 'MAMINHA MATURADA / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102022', description: 'OSSO BUCO / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102025', description: 'PÉ DE PORCO SALGADO / cx 5 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102026', description: 'PERNIL DE CORDEIRO C/ OSSO/cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102116', description: 'PERNIL DE SUINO S/OSSO / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102027', description: 'PERNIL SUINO COM OSSO/ cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102035', description: 'PICANHA BOVINA ((CONGELADA))', category: 'Carnes', unit: 'KG' },
+      { code: '102069', description: 'RABO BOVINO/ cx 5kg', category: 'Carnes', unit: 'KG' },
+      { code: '102031', description: 'RABO DE PORCO SALG. / cx 5 kg', category: 'Carnes', unit: 'KG' },
+      { code: '102063', description: 'TOUCINHO / cx 20 kg', category: 'Carnes', unit: 'KG' },
+      { code: '812378', description: 'ACÉM BOVINO PEÇA INTEIRA S/ OSSO', category: 'Carnes', unit: 'KG' },
+      { code: '25254', description: 'PATINHO BOVINO ANGUS', category: 'Carnes', unit: 'KG' },
+      { code: '25313', description: 'PANCETA', category: 'Carnes', unit: 'KG' },
+      { code: '25284', description: 'PEITO BOVINO', category: 'Carnes', unit: 'KG' },
+      { code: '25285', description: 'CORAÇÃO DA PALETA', category: 'Carnes', unit: 'KG' },
+      { code: '25081', description: 'PALETA DE CORDEIRO', category: 'Carnes', unit: 'KG' },
+
+      // Aves (9)
+      { code: '103001', description: 'CHESTER / cx 20 kg', category: 'Aves', unit: 'KG' },
+      { code: '103013', description: 'CODORNA CONG. / cx 3kg', category: 'Aves', unit: 'KG' },
+      { code: '103014', description: 'CORAÇÃO DE FRANGO CONG./cx12kg', category: 'Aves', unit: 'KG' },
+      { code: '103003', description: 'COXA SOBRE COXA C/ OSSO/ cx20kg', category: 'Aves', unit: 'KG' },
+      { code: '103002', description: 'COXA SOBRE COXA DESSOSADA 20kg', category: 'Aves', unit: 'KG' },
+      { code: '103005', description: 'PATO/ cx15kg', category: 'Aves', unit: 'KG' },
+      { code: '103006', description: 'PEITO DE FRANGO S/ OSSO / cx20kg', category: 'Aves', unit: 'KG' },
+      { code: '25118', description: 'COXA SOBRE COXA DE PATO DESSO.', category: 'Aves', unit: 'KG' },
+      { code: '103015', description: 'GALETO CONGELADO', category: 'Aves', unit: 'KG' },
+
+      // Peixes e Frutos Mar (26)
+      { code: '104002', description: 'ATUM EM FILET / cx 10kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104056', description: 'BACALHAU DO PORTO MORRUA / cx 25 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108067', description: 'CAMARAO 20X1 / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108070', description: 'CAMARAO 30X1 / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108068', description: 'CAMARÃO 40X1 / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108047', description: 'CAMARAO 7 BARBAS LIMPO / cx 16kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108048', description: 'CARNE DE SIRI *PURA* / pct 1 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108046', description: 'CAUDA DE LAGOSTA / cx 20kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108049', description: 'CONCHA DE VIERA LIMPA', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108088', description: 'FILE DE BACALHAU / cx 15 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '717304', description: 'FILE DE MERLUZÃO / cx 20 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108052', description: 'FILE DE PINTADO / cx 20kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108058', description: 'HADDOCK DEF. *PESC. AMAR. DEF.*/ pct 2kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104024', description: 'KANI KAMA / cx 5kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104023', description: 'LINGUADO EM FILET / cx 20kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104030', description: 'LULA EM TUBOS / cx 10kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104028', description: 'MARISCO 1/2 CASCA / cx 5 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104044', description: 'PESCADA AMARELA EM FILET/ cx 25 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '102043', description: 'POLVO CONGELADO', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104046', description: 'SALMÃO EM FILET / cx 25kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104052', description: 'TRUTA EM FILET / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104054', description: 'VONGOLE / pct 1 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '104065', description: 'FILE DE TILAPIA cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108077', description: 'CAÇAO EM POSTA', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '108096', description: 'TENTACULOS DE POLVO', category: 'Peixes e Frutos Mar', unit: 'KG' },
+      { code: '10303', description: 'LOMBO PIRARUCU', category: 'Peixes e Frutos Mar', unit: 'KG' },
+
+      // Embutidos / Outros (8)
+      { code: '106002', description: 'BACON EM MANTA / cx 12kg', category: 'Embutidos / Outros', unit: 'KG' },
+      { code: '106001', description: 'BACON FATIADO / cx 4,5kg', category: 'Embutidos / Outros', unit: 'KG' },
+      { code: '102097', description: 'LINGUIÇA CALABRESA DEF. / cx 7,5kg', category: 'Embutidos / Outros', unit: 'KG' },
+      { code: '106005', description: 'LINGUIÇA DE PAIO / cx 7,5 kg', category: 'Embutidos / Outros', unit: 'KG' },
+      { code: '106004', description: 'LINGUIÇA TOSCANA PURA/ cx 10kg', category: 'Embutidos / Outros', unit: 'KG' },
+      { code: '106017', description: 'SALSICHA HOT-DOG/ cx 20kg', category: 'Embutidos / Outros', unit: 'KG' },
+      { code: '106020', description: 'SALAME PEPPERONI / cx 3 kg', category: 'Embutidos / Outros', unit: 'KG' },
+      { code: '802025', description: 'PALITO PARA ESPETO CHURRASCO', category: 'Embutidos / Outros', unit: 'PA' }
+    ];
+
+    /**
+     * =========================================================================
+     * 2. GRADE COMPLETA DOS 7 DIAS E TURNOS (173 ITENS - CHECK LIST ACOUGUE.xlsx)
+     * =========================================================================
+     */
+    const DAYS_CONFIG = [
+      { key: 'SEGUNDA', label: 'Segunda-feira', short: 'SEG' },
+      { key: 'TERCA', label: 'Terça-feira', short: 'TER' },
+      { key: 'QUARTA', label: 'Quarta-feira', short: 'QUA' },
+      { key: 'QUINTA', label: 'Quinta-feira', short: 'QUI' },
+      { key: 'SEXTA', label: 'Sexta-feira', short: 'SEX' },
+      { key: 'SABADO', label: 'Sábado', short: 'SÁB' },
+      { key: 'DOMINGO', label: 'Domingo', short: 'DOM' }
+    ];
+
+    const FULL_STANDARD_CHECKLIST = {
+      // SEGUNDA: Almoço = 12, Jantar = 13 (Total = 25)
+      SEGUNDA: {
+        guests: { ALMOCO: 0, JANTAR: 0 },
+        ALMOCO: [
+          { rawLabel: 'Fraldinha', code: '102014', qty: 0, note: '' },
+          { rawLabel: 'Filé Mignon', code: '102037', qty: 0, note: '' },
+          { rawLabel: 'Cupim', code: '102083', qty: 0, note: '' },
+          { rawLabel: 'Carne Moída Bovina', code: null, qty: 0, note: 'Definir corte/código na base' },
+          { rawLabel: 'Lombo Suíno', code: '102019', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Bragantina', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Bacon em Cubos', code: '106002', qty: 0, note: '' },
+          { rawLabel: 'Coxa e Sobrecoxa Desossadas', code: '103002', qty: 0, note: '' },
+          { rawLabel: 'Drumet de Frango', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Filé de Pescada Amarela', code: '104044', qty: 0, note: '' },
+          { rawLabel: 'Camarão Médio Limpo', code: '108070', qty: 0, note: '' }
+        ],
+        JANTAR: [
+          { rawLabel: 'Assado de Tira', code: '102080', qty: 0, note: '' },
+          { rawLabel: 'Acém', code: '812378', qty: 0, note: '' },
+          { rawLabel: 'Fraldinha', code: '102014', qty: 0, note: '' },
+          { rawLabel: 'Picanha', code: '102035', qty: 0, note: '' },
+          { rawLabel: 'Pernil Suíno', code: '102116', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Copa Lombo', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Chouriço', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Paio', code: '106005', qty: 0, note: '' },
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Sobrecoxa de Frango', code: '103003', qty: 0, note: '' },
+          { rawLabel: 'Coxa de Frango', code: '103003', qty: 0, note: '' },
+          { rawLabel: 'Filé de Peixe Branco', code: '104044', qty: 0, note: '' }
+        ]
+      },
+      // TERCA: Almoço = 11, Jantar = 9 (Total = 20)
+      TERCA: {
+        guests: { ALMOCO: 0, JANTAR: 0 },
+        ALMOCO: [
+          { rawLabel: 'Pirarucu', code: '10303', qty: 0, note: '' },
+          { rawLabel: 'Camarão', code: '108067', qty: 0, note: '' },
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Alcatra', code: '102001', qty: 0, note: '' },
+          { rawLabel: 'Costelinha Suína', code: '102012', qty: 0, note: '' },
+          { rawLabel: 'Bacalhau', code: '104056', qty: 0, note: '' },
+          { rawLabel: 'Acém', code: '812378', qty: 0, note: '' },
+          { rawLabel: 'Bife Ancho', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça Artesanal', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Panceta Suína', code: '25313', qty: 0, note: '' },
+          { rawLabel: 'Maminha', code: '102071', qty: 0, note: '' }
+        ],
+        JANTAR: [
+          { rawLabel: 'Patinho', code: '25254', qty: 0, note: '' },
+          { rawLabel: 'Acém', code: '812378', qty: 0, note: '' },
+          { rawLabel: 'Filé Mignon', code: '102037', qty: 0, note: '' },
+          { rawLabel: 'Namorado', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Coxa e Sobrecoxa Desossadas', code: '103002', qty: 0, note: '' },
+          { rawLabel: 'Camarão', code: '108067', qty: 0, note: '' },
+          { rawLabel: 'Polvo', code: '102043', qty: 0, note: '' },
+          { rawLabel: 'Paleta de Cordeiro', code: '25081', qty: 0, note: '' }
+        ]
+      },
+      // QUARTA: Almoço = 12, Jantar = 12 (Total = 24)
+      QUARTA: {
+        guests: { ALMOCO: 0, JANTAR: 0 },
+        ALMOCO: [
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Costela Bovina', code: '102080', qty: 0, note: '' },
+          { rawLabel: 'Coxão Duro', code: '102082', qty: 0, note: '' },
+          { rawLabel: 'Pernil Suíno', code: '102116', qty: 0, note: '' },
+          { rawLabel: 'Salmão', code: '104046', qty: 0, note: '' },
+          { rawLabel: 'Paio', code: '106005', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Calabresa', code: '102097', qty: 0, note: '' },
+          { rawLabel: 'Bacalhau', code: '104056', qty: 0, note: '' },
+          { rawLabel: 'Picanha', code: '102035', qty: 0, note: '' },
+          { rawLabel: 'Costelinha Suína', code: '102012', qty: 0, note: '' },
+          { rawLabel: 'Galeto', code: '103015', qty: 0, note: '' },
+          { rawLabel: 'Fraldinha', code: '102014', qty: 0, note: '' }
+        ],
+        JANTAR: [
+          { rawLabel: 'Pernil Suíno', code: '102116', qty: 0, note: '' },
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Alcatra', code: '102001', qty: 0, note: '' },
+          { rawLabel: 'Tilápia', code: '104065', qty: 0, note: '' },
+          { rawLabel: 'Barriga de Porco', code: '25313', qty: 0, note: '' },
+          { rawLabel: 'Camarão', code: '108067', qty: 0, note: '' },
+          { rawLabel: 'Lula', code: '104030', qty: 0, note: '' },
+          { rawLabel: 'Polvo', code: '102043', qty: 0, note: '' },
+          { rawLabel: 'Acém', code: '812378', qty: 0, note: '' },
+          { rawLabel: 'Coxa e Sobrecoxa de Frango', code: '103003', qty: 0, note: '' },
+          { rawLabel: 'Costelinha Suína', code: '102012', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' }
+        ]
+      },
+      // QUINTA: Almoço = 9, Jantar = 14 (Total = 23)
+      QUINTA: {
+        guests: { ALMOCO: 0, JANTAR: 0 },
+        ALMOCO: [
+          { rawLabel: 'Pescada Amarela', code: '104044', qty: 0, note: '' },
+          { rawLabel: 'Coxa e Sobrecoxa Desossadas', code: '103002', qty: 0, note: '' },
+          { rawLabel: 'Copa-Lombo', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Salmão', code: '104046', qty: 0, note: '' },
+          { rawLabel: 'Entrecôte', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça Artesanal Apimentada', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Panceta Suína', code: '25313', qty: 0, note: '' },
+          { rawLabel: 'Maminha', code: '102071', qty: 0, note: '' }
+        ],
+        JANTAR: [
+          { rawLabel: 'Chorizo', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Presunto Serrano', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Contrafilé', code: '102003', qty: 0, note: '' },
+          { rawLabel: 'Filé de Peixe Branco', code: '104044', qty: 0, note: '' },
+          { rawLabel: 'Polvo', code: '102043', qty: 0, note: '' },
+          { rawLabel: 'Pato Inteiro', code: '103005', qty: 0, note: '' },
+          { rawLabel: 'Paio', code: '106005', qty: 0, note: '' },
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Camarão', code: '108067', qty: 0, note: '' },
+          { rawLabel: 'Lula', code: '104030', qty: 0, note: '' },
+          { rawLabel: 'Bacalhau', code: '104056', qty: 0, note: '' },
+          { rawLabel: 'Lombo Suíno', code: '102019', qty: 0, note: '' },
+          { rawLabel: 'Frango Inteiro', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça Calabresa', code: '102097', qty: 0, note: '' }
+        ]
+      },
+      // SEXTA: Almoço = 11, Jantar = 13 (Total = 24)
+      SEXTA: {
+        guests: { ALMOCO: 0, JANTAR: 0 },
+        ALMOCO: [
+          { rawLabel: 'Filé de Peixe', code: '104044', qty: 0, note: '' },
+          { rawLabel: 'Filé de Pescada', code: '104044', qty: 0, note: '' },
+          { rawLabel: 'Paleta de Cordeiro', code: '25081', qty: 0, note: '' },
+          { rawLabel: 'Galeto', code: '103015', qty: 0, note: '' },
+          { rawLabel: 'Acém', code: '812378', qty: 0, note: '' },
+          { rawLabel: 'Carne de Siri', code: '108048', qty: 0, note: '' },
+          { rawLabel: 'Bacon', code: '106002', qty: 0, note: '' },
+          { rawLabel: 'Tulipa da Asa', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Assado de Tira', code: '102080', qty: 0, note: '' },
+          { rawLabel: 'Alcatra', code: '102001', qty: 0, note: '' }
+        ],
+        JANTAR: [
+          { rawLabel: 'Acém', code: '812378', qty: 0, note: '' },
+          { rawLabel: 'Filé Mignon', code: '102037', qty: 0, note: '' },
+          { rawLabel: 'Anchova', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Salmão', code: '104046', qty: 0, note: '' },
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Ossobuco', code: '102022', qty: 0, note: '' },
+          { rawLabel: 'Coxa e Sobrecoxa de Frango', code: '103003', qty: 0, note: '' },
+          { rawLabel: 'Pernil Suíno', code: '102116', qty: 0, note: '' },
+          { rawLabel: 'Frango Inteiro', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça com Provolone', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Barriga de Porco', code: '25313', qty: 0, note: '' },
+          { rawLabel: 'Lula', code: '104030', qty: 0, note: '' }
+        ]
+      },
+      // SABADO: Almoço = 16, Jantar = 14 (Total = 30)
+      SABADO: {
+        guests: { ALMOCO: 0, JANTAR: 0 },
+        ALMOCO: [
+          { rawLabel: 'Carne Seca Bovina', code: '102117', qty: 0, note: '' },
+          { rawLabel: 'Pé de Porco', code: '102025', qty: 0, note: '' },
+          { rawLabel: 'Orelha de Porco', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Pernil Suíno', code: '102116', qty: 0, note: '' },
+          { rawLabel: 'Costelinha Suína', code: '102012', qty: 0, note: '' },
+          { rawLabel: 'Bacon', code: '106002', qty: 0, note: '' },
+          { rawLabel: 'Barriga de Porco', code: '25313', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Paio', code: '106005', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Calabresa', code: '102097', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Frango Inteiro', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Acem sem osso', code: '812378', qty: 0, note: '' },
+          { rawLabel: 'Camarão', code: '108067', qty: 0, note: '' },
+          { rawLabel: 'Coxinha da Asa', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Maminha', code: '102071', qty: 0, note: '' },
+          { rawLabel: 'Filé Mignon', code: '102037', qty: 0, note: '' }
+        ],
+        JANTAR: [
+          { rawLabel: 'Carne de Siri Limpa', code: '108048', qty: 0, note: '' },
+          { rawLabel: 'Camarão Médio Limpo', code: '108070', qty: 0, note: '' },
+          { rawLabel: 'Manjubinha', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Pirarucu', code: '10303', qty: 0, note: '' },
+          { rawLabel: 'Tainha Inteira Limpa', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Mexilhão', code: '104028', qty: 0, note: '' },
+          { rawLabel: 'file de tilapia', code: '104065', qty: 0, note: '' },
+          { rawLabel: 'Contrafilé', code: '102003', qty: 0, note: '' },
+          { rawLabel: 'Fraldinha', code: '102014', qty: 0, note: '' },
+          { rawLabel: 'Cupim', code: '102083', qty: 0, note: '' },
+          { rawLabel: 'Coxa e Sobrecoxa de Frango', code: '103003', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Artesanal Apimentada', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Lula', code: '104030', qty: 0, note: '' },
+          { rawLabel: 'Bacalhau desfiado', code: '108088', qty: 0, note: '' }
+        ]
+      },
+      // DOMINGO: Almoço = 13, Jantar = 14 (Total = 27)
+      DOMINGO: {
+        guests: { ALMOCO: 0, JANTAR: 0 },
+        ALMOCO: [
+          { rawLabel: 'Salmão', code: '104046', qty: 0, note: '' },
+          { rawLabel: 'Coxa e Sobrecoxa de Pato', code: '25118', qty: 0, note: '' },
+          { rawLabel: 'Alcatra', code: '102001', qty: 0, note: '' },
+          { rawLabel: 'Pernil Suíno', code: '102116', qty: 0, note: '' },
+          { rawLabel: 'Paleta de Cordeiro', code: '25081', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Sobrecoxa de Frango', code: '103003', qty: 0, note: '' },
+          { rawLabel: 'Picanha', code: '102035', qty: 0, note: '' },
+          { rawLabel: 'Maminha', code: '102071', qty: 0, note: '' },
+          { rawLabel: 'Denver Steak', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Camarão', code: '108067', qty: 0, note: '' },
+          { rawLabel: 'Polvo', code: '102043', qty: 0, note: '' },
+          { rawLabel: 'Lula', code: '104030', qty: 0, note: '' }
+        ],
+        JANTAR: [
+          { rawLabel: 'Barriga de Porco', code: '25313', qty: 0, note: '' },
+          { rawLabel: 'Entrecôte', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Namorado', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Camarão', code: '108067', qty: 0, note: '' },
+          { rawLabel: 'Peito de Frango', code: '103006', qty: 0, note: '' },
+          { rawLabel: 'Salmão', code: '104046', qty: 0, note: '' },
+          { rawLabel: 'Pato Inteiro', code: '103005', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Artesanal', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Maminha', code: '102071', qty: 0, note: '' },
+          { rawLabel: 'Frango Inteiro', code: null, qty: 0, note: 'Verificar código na base' },
+          { rawLabel: 'Carré Suíno', code: '102076', qty: 0, note: '' },
+          { rawLabel: 'Linguiça Toscana', code: '106004', qty: 0, note: '' },
+          { rawLabel: 'Ossobuco', code: '102022', qty: 0, note: '' },
+          { rawLabel: 'Paleta de Cordeiro', code: '25081', qty: 0, note: '' }
+        ]
+      }
+    };
+
+    /**
+     * =========================================================================
+     * 3. ESTADO E PERSISTÊNCIA (CHAVE pedido_acougue_hotel_state_v6)
+     * =========================================================================
+     */
+    const STORAGE_KEY = 'pedido_acougue_hotel_state_v6';
+
+    function cloneDefaultState() {
+      return {
+        weekReference: 'Programação Semanal — Cozinha & Açougue',
+        activeTab: 'lancamento',
+        activeDay: 'SEGUNDA',
+        onlyUnmapped: false,
+        consolidadoDays: DAYS_CONFIG.map((d) => d.key),
+        catalog: JSON.parse(JSON.stringify(INITIAL_CATALOG)),
+        checklist: JSON.parse(JSON.stringify(FULL_STANDARD_CHECKLIST))
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return cloneDefaultState();
+        const parsed = JSON.parse(raw);
+        const fallback = cloneDefaultState();
+        return {
+          ...fallback,
+          ...parsed,
+          catalog: Array.isArray(parsed.catalog) && parsed.catalog.length > 0 ? parsed.catalog : fallback.catalog,
+          checklist: parsed.checklist && typeof parsed.checklist === 'object' ? parsed.checklist : fallback.checklist,
+          consolidadoDays: Array.isArray(parsed.consolidadoDays) ? parsed.consolidadoDays : fallback.consolidadoDays
+        };
+      } catch (err) {
+        console.error('Erro ao ler localStorage:', err);
+        return cloneDefaultState();
+      }
+    }
+
+    let state = loadState();
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        updateCatalogCountBadge();
+        updateUnmappedBadge();
+      } catch (err) {
+        console.error('Erro ao salvar no localStorage:', err);
+        showToast('Aviso: não foi possível salvar no navegador.', 'error');
+      }
+    }
+
+    /**
+     * Força o carregamento do padrão completo de 173 itens dos 7 dias
+     */
+    function loadFullStandardSchedule(silent = false) {
+      state.checklist = JSON.parse(JSON.stringify(FULL_STANDARD_CHECKLIST));
+      if (!Array.isArray(state.consolidadoDays) || state.consolidadoDays.length === 0) {
+        state.consolidadoDays = DAYS_CONFIG.map((d) => d.key);
+      }
+      saveState();
+      renderAll();
+      if (!silent) {
+        showToast('Padrão completo carregado: 173 itens distribuídos em todos os 7 dias e turnos!');
+      }
+    }
+
+    function formatNumberBR(num, decimals = 2) {
+      const n = Number(num) || 0;
+      return n.toLocaleString('pt-BR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    function parseQtyInput(val) {
+      if (val === '' || val === null || val === undefined) return 0;
+      const normalized = String(val).replace(',', '.');
+      const parsed = parseFloat(normalized);
+      return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
+    }
+
+    function findCatalogItem(code) {
+      if (!code) return null;
+      return state.catalog.find((item) => String(item.code) === String(code)) || null;
+    }
+
+    /**
+     * =========================================================================
+     * 4. LOGO E UI HELPERS
+     * =========================================================================
+     */
+    function handleLogoError(imgEl) {
+      try {
+        if (!imgEl) return;
+        imgEl.style.display = 'none';
+        if (imgEl.nextElementSibling) {
+          imgEl.nextElementSibling.classList.remove('hidden');
+        }
+      } catch (_) {
+        // Fallback silencioso
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const styles = {
+        success: 'bg-madeira-900 text-white border-madeira-700',
+        warning: 'bg-amber-800 text-white border-amber-600',
+        error: 'bg-red-800 text-white border-red-600'
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-medium transition-all duration-200 ${styles[type] || styles.success}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 250);
+      }, 2800);
+    }
+
+    function openModal(htmlContent) {
+      const container = document.getElementById('modal-container');
+      const box = document.getElementById('modal-box');
+      box.innerHTML = htmlContent;
+      container.classList.remove('hidden');
+      container.classList.add('flex');
+    }
+
+    function closeModal() {
+      const container = document.getElementById('modal-container');
+      container.classList.add('hidden');
+      container.classList.remove('flex');
+    }
+
+    document.getElementById('modal-container').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-container') closeModal();
+    });
+
+    function openResetModal() {
+      openModal(`
+        <div>
+          <h3 class="text-lg font-extrabold text-vinho-900">Restaurar Planilhas Originais?</h3>
+          <p class="text-sm text-madeira-700 mt-1">
+            Isso irá restaurar os 75 códigos de <strong>Pasta1.xlsx</strong> e a grade completa de <strong>173 itens</strong> de <strong>CHECK LIST ACOUGUE.xlsx</strong>.
+          </p>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-madeira-100 hover:bg-madeira-200 text-madeira-800 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" onclick="confirmResetAll()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-vinho-800 hover:bg-vinho-900 text-white cursor-pointer">
+            Sim, Restaurar
+          </button>
+        </div>
+      `);
+    }
+
+    function confirmResetAll() {
+      state = cloneDefaultState();
+      saveState();
+      closeModal();
+      renderAll();
+      showToast('Dados originais restaurados com sucesso (173 itens e 75 códigos)!');
+    }
+
+    /**
+     * =========================================================================
+     * 5. NAVEGAÇÃO ENTRE ABAS
+     * =========================================================================
+     */
+    function switchTab(tabName) {
+      state.activeTab = tabName;
+      saveState();
+
+      ['lancamento', 'consolidado', 'codigos'].forEach((t) => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const view = document.getElementById(`view-${t}`);
+        const isActive = t === tabName;
+        if (btn) {
+          btn.className = isActive
+            ? 'tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer bg-vinho-800 text-white shadow-xs'
+            : 'tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer bg-madeira-100 text-madeira-800 hover:bg-madeira-200';
+        }
+        if (view) {
+          view.classList.toggle('hidden', !isActive);
+        }
+      });
+
+      if (tabName === 'consolidado') renderConsolidado();
+      if (tabName === 'codigos') renderCatalogTable();
+      if (tabName === 'lancamento') renderLancamentoView();
+    }
+
+    function updateCatalogCountBadge() {
+      const el = document.getElementById('catalog-count-label');
+      if (el) el.textContent = state.catalog.length;
+    }
+
+    function getUnmappedItemsCount() {
+      let count = 0;
+      DAYS_CONFIG.forEach((d) => {
+        const dayObj = state.checklist[d.key];
+        if (!dayObj) return;
+        ['ALMOCO', 'JANTAR'].forEach((shift) => {
+          (dayObj[shift] || []).forEach((item) => {
+            if (!item.code || !findCatalogItem(item.code)) {
+              count++;
+            }
+          });
+        });
+      });
+      return count;
+    }
+
+    function updateUnmappedBadge() {
+      const badge = document.getElementById('unmapped-badge');
+      if (!badge) return;
+      const total = getUnmappedItemsCount();
+      if (total > 0) {
+        badge.textContent = `${total} sem cód.`;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 6. ABA 1 — LANÇAMENTO POR DIA E TURNO (ALMOÇO E JANTAR VISÍVEIS)
+     * =========================================================================
+     */
+    function updateMetaField(field, value) {
+      state[field] = value;
+      saveState();
+    }
+
+    function selectDay(dayKey) {
+      state.activeDay = dayKey;
+      saveState();
+      renderLancamentoView();
+    }
+
+    function ensureDayStructure(dayKey) {
+      if (!state.checklist[dayKey]) {
+        state.checklist[dayKey] = {
+          guests: { ALMOCO: 0, JANTAR: 0 },
+          ALMOCO: [],
+          JANTAR: []
+        };
+      }
+      if (!state.checklist[dayKey].guests) {
+        state.checklist[dayKey].guests = { ALMOCO: 0, JANTAR: 0 };
+      }
+      if (!Array.isArray(state.checklist[dayKey].ALMOCO)) state.checklist[dayKey].ALMOCO = [];
+      if (!Array.isArray(state.checklist[dayKey].JANTAR)) state.checklist[dayKey].JANTAR = [];
+      return state.checklist[dayKey];
+    }
+
+    function updateGuests(shift, val) {
+      const dayObj = ensureDayStructure(state.activeDay);
+      dayObj.guests[shift] = Math.max(0, Math.floor(parseQtyInput(val)));
+      saveState();
+    }
+
+    function populateAddItemDropdown() {
+      const select = document.getElementById('add-item-select');
+      if (!select) return;
+      const currentVal = select.value;
+      const sorted = [...state.catalog].sort((a, b) => a.description.localeCompare(b.description, 'pt-BR'));
+      select.innerHTML = sorted
+        .map((item) => `<option value="${escapeHtml(item.code)}">[${escapeHtml(item.code)}] ${escapeHtml(item.description)} (${escapeHtml(item.unit)})</option>`)
+        .join('');
+      if (currentVal && findCatalogItem(currentVal)) {
+        select.value = currentVal;
+      }
+    }
+
+    function handleAddCatalogItemToDay() {
+      const code = document.getElementById('add-item-select').value;
+      const shift = document.getElementById('add-item-shift').value;
+      const qty = parseQtyInput(document.getElementById('add-item-qty').value);
+
+      const catItem = findCatalogItem(code);
+      if (!catItem) {
+        showToast('Selecione um item válido da base de códigos.', 'error');
+        return;
+      }
+
+      const dayObj = ensureDayStructure(state.activeDay);
+      const existingIdx = dayObj[shift].findIndex((i) => String(i.code) === String(catItem.code));
+
+      if (existingIdx >= 0) {
+        dayObj[shift][existingIdx].qty = Number((parseQtyInput(dayObj[shift][existingIdx].qty) + qty).toFixed(3));
+        showToast(`Quantidade somada em ${catItem.description} (${shift === 'ALMOCO' ? 'Almoço' : 'Jantar'}).`);
+      } else {
+        dayObj[shift].push({
+          rawLabel: catItem.description,
+          code: catItem.code,
+          qty: qty,
+          note: ''
+        });
+        showToast(`${catItem.description} adicionado ao ${shift === 'ALMOCO' ? 'Almoço' : 'Jantar'}.`);
+      }
+
+      document.getElementById('add-item-qty').value = '';
+      saveState();
+      renderLancamentoView();
+    }
+
+    function openCustomChecklistModal() {
+      const dayCfg = DAYS_CONFIG.find((d) => d.key === state.activeDay);
+      const codeOptions = [
+        `<option value="">— Sem código definido ainda —</option>`,
+        ...state.catalog.map((c) => `<option value="${escapeHtml(c.code)}">[${escapeHtml(c.code)}] ${escapeHtml(c.description)}</option>`)
+      ].join('');
+
+      openModal(`
+        <div>
+          <h3 class="text-lg font-extrabold text-vinho-900">Adicionar Item Avulso — ${escapeHtml(dayCfg ? dayCfg.label : state.activeDay)}</h3>
+          <p class="text-xs text-madeira-600 mt-0.5">Adicione um item extra ou observação específica de corte/preparo.</p>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-madeira-800 mb-1">Nome / Descrição no Checklist *</label>
+            <input id="custom-label-input" type="text" placeholder="Ex.: Picanha em tiras / Corte especial evento" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-madeira-800 mb-1">Turno</label>
+              <select id="custom-shift-input" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm">
+                <option value="ALMOCO">Almoço</option>
+                <option value="JANTAR">Jantar</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-madeira-800 mb-1">Quantidade (KG)</label>
+              <input id="custom-qty-input" type="number" step="0.01" min="0" placeholder="0.00" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-madeira-800 mb-1">Vincular Código da Base (Opcional)</label>
+            <select id="custom-code-input" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm">
+              ${codeOptions}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-madeira-800 mb-1">Observação de Corte / Preparo</label>
+            <input id="custom-note-input" type="text" placeholder="Ex.: Moída 2x, bifes finos, sem gordura..." class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm" />
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-madeira-100 hover:bg-madeira-200 text-madeira-800 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveCustomChecklistItem()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-terracotta-600 hover:bg-terracotta-700 text-white cursor-pointer">
+            Salvar Item
+          </button>
+        </div>
+      `);
+    }
+
+    function saveCustomChecklistItem() {
+      const label = document.getElementById('custom-label-input').value.trim();
+      const shift = document.getElementById('custom-shift-input').value;
+      const qty = parseQtyInput(document.getElementById('custom-qty-input').value);
+      const code = document.getElementById('custom-code-input').value || null;
+      const note = document.getElementById('custom-note-input').value.trim();
+
+      if (!label) {
+        showToast('Informe o nome ou descrição do item.', 'error');
+        return;
+      }
+
+      const dayObj = ensureDayStructure(state.activeDay);
+      dayObj[shift].push({ rawLabel: label, code, qty, note });
+      saveState();
+      closeModal();
+      renderLancamentoView();
+      showToast('Item adicionado ao checklist do dia!');
+    }
+
+    function toggleOnlyUnmappedFilter() {
+      state.onlyUnmapped = !state.onlyUnmapped;
+      const btn = document.getElementById('filter-unmapped-btn');
+      if (btn) {
+        btn.className = state.onlyUnmapped
+          ? 'px-3 py-1.5 rounded-xl font-semibold border border-amber-600 bg-amber-600 text-white transition cursor-pointer'
+          : 'px-3 py-1.5 rounded-xl font-semibold border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 transition cursor-pointer';
+      }
+      renderDayItems();
+    }
+
+    function updateChecklistItemCode(shift, index, newCode) {
+      const dayObj = ensureDayStructure(state.activeDay);
+      if (!dayObj[shift][index]) return;
+      dayObj[shift][index].code = newCode || null;
+      saveState();
+      renderDaySummary();
+      renderDayItems();
+      showToast('Código da proteína atualizado.');
+    }
+
+    function updateChecklistItemQty(shift, index, val) {
+      const dayObj = ensureDayStructure(state.activeDay);
+      if (!dayObj[shift][index]) return;
+      dayObj[shift][index].qty = parseQtyInput(val);
+      saveState();
+      renderDaySummary();
+      updateShiftSubtotalLabel(shift);
+    }
+
+    function updateChecklistItemNote(shift, index, val) {
+      const dayObj = ensureDayStructure(state.activeDay);
+      if (!dayObj[shift][index]) return;
+      dayObj[shift][index].note = val;
+      saveState();
+    }
+
+    function removeChecklistItem(shift, index) {
+      const dayObj = ensureDayStructure(state.activeDay);
+      if (!dayObj[shift][index]) return;
+      dayObj[shift].splice(index, 1);
+      saveState();
+      renderLancamentoView();
+      showToast('Item removido do turno.');
+    }
+
+    function updateShiftSubtotalLabel(shift) {
+      const dayObj = ensureDayStructure(state.activeDay);
+      const sum = (dayObj[shift] || []).reduce((acc, item) => acc + parseQtyInput(item.qty), 0);
+      const el = document.getElementById(`shift-subtotal-${shift}`);
+      if (el) el.textContent = `${formatNumberBR(sum)} KG`;
+    }
+
+    function renderDaySummary() {
+      const dayObj = ensureDayStructure(state.activeDay);
+      const almocoList = dayObj.ALMOCO || [];
+      const jantarList = dayObj.JANTAR || [];
+      const almocoSum = almocoList.reduce((acc, i) => acc + parseQtyInput(i.qty), 0);
+      const jantarSum = jantarList.reduce((acc, i) => acc + parseQtyInput(i.qty), 0);
+      const totalDay = almocoSum + jantarSum;
+
+      document.getElementById('day-total-kg').textContent = formatNumberBR(totalDay);
+      document.getElementById('day-shifts-breakdown').textContent =
+        `Almoço: ${formatNumberBR(almocoSum)} kg • Jantar: ${formatNumberBR(jantarSum)} kg`;
+
+      const badge = document.getElementById('current-day-items-badge');
+      if (badge) {
+        badge.textContent = `${almocoList.length + jantarList.length} itens no dia (${almocoList.length} Almoço • ${jantarList.length} Jantar)`;
+      }
+
+      const dayUnmapped = [...almocoList, ...jantarList].filter((i) => !i.code || !findCatalogItem(i.code)).length;
+      const warnEl = document.getElementById('day-unmapped-warning');
+      if (warnEl) {
+        warnEl.textContent = dayUnmapped > 0
+          ? `${dayUnmapped} ${dayUnmapped === 1 ? 'item sem código' : 'itens sem código'} neste dia`
+          : 'Todos os itens possuem código vinculado';
+      }
+    }
+
+    function renderLancamentoView() {
+      document.getElementById('week-reference-input').value = state.weekReference || '';
+
+      const grid = document.getElementById('days-selector-grid');
+      grid.innerHTML = DAYS_CONFIG.map((d) => {
+        const dObj = ensureDayStructure(d.key);
+        const dayTotal =
+          (dObj.ALMOCO || []).reduce((s, x) => s + parseQtyInput(x.qty), 0) +
+          (dObj.JANTAR || []).reduce((s, x) => s + parseQtyInput(x.qty), 0);
+        const dayCount = (dObj.ALMOCO || []).length + (dObj.JANTAR || []).length;
+        const isSelected = state.activeDay === d.key;
+
+        return `
+          <button
+            type="button"
+            onclick="selectDay('${d.key}')"
+            class="flex flex-col items-start p-3 rounded-xl border text-left transition cursor-pointer ${
+              isSelected
+                ? 'bg-vinho-800 text-white border-vinho-900 shadow-xs'
+                : 'bg-madeira-50 hover:bg-madeira-100 text-madeira-900 border-madeira-200'
+            }"
+          >
+            <div class="flex items-center justify-between w-full gap-1">
+              <span class="text-xs font-extrabold tracking-wide">${d.short}</span>
+              <span class="text-[11px] font-bold px-1.5 py-0.5 rounded-md ${
+                isSelected ? 'bg-white/20 text-white' : 'bg-madeira-200/80 text-madeira-800'
+              }">${formatNumberBR(dayTotal, 1)} kg</span>
+            </div>
+            <span class="text-xs font-semibold mt-1 truncate w-full ${isSelected ? 'text-madeira-100' : 'text-madeira-700'}">
+              ${d.label}
+            </span>
+            <span class="text-[10px] mt-0.5 ${isSelected ? 'text-madeira-200' : 'text-madeira-500'}">
+              ${dayCount} itens
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      const activeDayCfg = DAYS_CONFIG.find((d) => d.key === state.activeDay) || DAYS_CONFIG[0];
+      document.getElementById('current-day-heading').textContent = activeDayCfg.label.toUpperCase();
+
+      const dayObj = ensureDayStructure(state.activeDay);
+      document.getElementById('guests-almoco-input').value = dayObj.guests.ALMOCO || '';
+      document.getElementById('guests-jantar-input').value = dayObj.guests.JANTAR || '';
+
+      populateAddItemDropdown();
+      renderDaySummary();
+      renderDayItems();
+    }
+
+    function renderDayItems() {
+      const container = document.getElementById('day-shifts-container');
+      const dayObj = ensureDayStructure(state.activeDay);
+      const query = (document.getElementById('day-search-input')?.value || '').trim().toLowerCase();
+
+      container.innerHTML = ['ALMOCO', 'JANTAR']
+        .map((shift) => {
+          const items = dayObj[shift] || [];
+          const shiftSum = items.reduce((acc, item) => acc + parseQtyInput(item.qty), 0);
+
+          const filteredEntries = items
+            .map((item, idx) => ({ item, idx }))
+            .filter(({ item }) => {
+              const catMatch = findCatalogItem(item.code);
+              const isUnmapped = !item.code || !catMatch;
+              if (state.onlyUnmapped && !isUnmapped) return false;
+              if (!query) return true;
+
+              const haystack = [
+                item.rawLabel || '',
+                item.code || '',
+                catMatch ? catMatch.description : '',
+                item.note || ''
+              ]
+                .join(' ')
+                .toLowerCase();
+              return haystack.includes(query);
+            });
+
+          const shiftLabel = shift === 'ALMOCO' ? 'ALMOÇO' : 'JANTAR';
+          const badgeColor =
+            shift === 'ALMOCO'
+              ? 'bg-amber-100 text-amber-900 border-amber-300'
+              : 'bg-vinho-100 text-vinho-900 border-vinho-300';
+
+          const rowsHtml =
+            filteredEntries.length === 0
+              ? `
+                <tr>
+                  <td colspan="5" class="py-8 px-4 text-center text-sm text-madeira-500">
+                    Nenhum item encontrado para este turno com os filtros atuais.
+                  </td>
+                </tr>
+              `
+              : filteredEntries
+                  .map(({ item, idx }) => {
+                    const catMatch = findCatalogItem(item.code);
+                    const isUnmapped = !item.code || !catMatch;
+                    const unitLabel = catMatch ? catMatch.unit : 'KG';
+
+                    const codeOptions = [
+                      `<option value="" ${!item.code ? 'selected' : ''}>⚠️ Sem código / Definir</option>`,
+                      ...state.catalog.map(
+                        (c) =>
+                          `<option value="${escapeHtml(c.code)}" ${String(item.code) === String(c.code) ? 'selected' : ''}>
+                            ${escapeHtml(c.code)} — ${escapeHtml(c.description)}
+                          </option>`
+                      )
+                    ].join('');
+
+                    return `
+                      <tr class="${isUnmapped ? 'bg-amber-50/70' : 'hover:bg-madeira-50/60'} transition">
+                        <td class="py-3 px-3 sm:px-4 align-top">
+                          <div class="font-bold text-madeira-900">${escapeHtml(item.rawLabel || 'Item')}</div>
+                          ${
+                            catMatch
+                              ? `<div class="text-[11px] text-madeira-500 mt-0.5">Base: ${escapeHtml(catMatch.description)} <span class="text-madeira-400">(${escapeHtml(catMatch.category)})</span></div>`
+                              : `<div class="text-[11px] font-semibold text-amber-800 mt-0.5">Atenção: vincule ao código oficial para sair no consolidado da secretaria.</div>`
+                          }
+                        </td>
+
+                        <td class="py-3 px-3 sm:px-4 align-top min-w-[230px]">
+                          <select
+                            onchange="updateChecklistItemCode('${shift}', ${idx}, this.value)"
+                            class="w-full px-2.5 py-2 rounded-xl text-xs font-medium border ${
+                              isUnmapped
+                                ? 'border-amber-400 bg-amber-100/70 text-amber-950 font-bold'
+                                : 'border-madeira-300 bg-white text-madeira-900'
+                            } focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+                          >
+                            ${codeOptions}
+                          </select>
+                        </td>
+
+                        <td class="py-3 px-3 sm:px-4 align-top w-36">
+                          <div class="flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value="${item.qty > 0 ? item.qty : ''}"
+                              placeholder="0,00"
+                              oninput="updateChecklistItemQty('${shift}', ${idx}, this.value)"
+                              class="w-full px-2.5 py-2 rounded-xl border border-madeira-300 bg-white text-sm font-bold text-right text-madeira-900 focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+                            />
+                            <span class="text-xs font-bold text-madeira-600 shrink-0">${escapeHtml(unitLabel)}</span>
+                          </div>
+                        </td>
+
+                        <td class="py-3 px-3 sm:px-4 align-top min-w-[165px]">
+                          <input
+                            type="text"
+                            value="${escapeHtml(item.note || '')}"
+                            placeholder="Obs. corte / preparo..."
+                            oninput="updateChecklistItemNote('${shift}', ${idx}, this.value)"
+                            class="w-full px-2.5 py-2 rounded-xl border border-madeira-200 bg-madeira-50/70 focus:bg-white text-xs text-madeira-800 focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+                          />
+                        </td>
+
+                        <td class="py-3 px-3 sm:px-4 align-top text-right">
+                          <button
+                            type="button"
+                            onclick="removeChecklistItem('${shift}', ${idx})"
+                            class="p-2 rounded-lg text-madeira-500 hover:text-red-700 hover:bg-red-50 transition cursor-pointer"
+                            title="Remover item do turno"
+                          >
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="3 6 5 6 21 6"/>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                    `;
+                  })
+                  .join('');
+
+          return `
+            <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs overflow-hidden">
+              <div class="px-4 sm:px-5 py-3.5 bg-madeira-50/90 border-b border-madeira-200 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="px-3 py-1 rounded-lg text-xs font-extrabold border ${badgeColor}">
+                    ${shiftLabel}
+                  </span>
+                  <span class="text-xs font-semibold text-madeira-700">
+                    ${items.length} ${items.length === 1 ? 'item previsto' : 'itens previstos'}
+                  </span>
+                </div>
+                <div class="text-xs sm:text-sm font-extrabold text-madeira-900">
+                  Subtotal do Turno: <span id="shift-subtotal-${shift}" class="text-terracotta-700">${formatNumberBR(shiftSum)} KG</span>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-madeira-200 bg-white text-[11px] font-bold uppercase tracking-wider text-madeira-600">
+                      <th class="py-2.5 px-3 sm:px-4">Item / Corte</th>
+                      <th class="py-2.5 px-3 sm:px-4">Código da Proteína</th>
+                      <th class="py-2.5 px-3 sm:px-4 text-right">Quantidade</th>
+                      <th class="py-2.5 px-3 sm:px-4">Observação</th>
+                      <th class="py-2.5 px-3 sm:px-4 text-right">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-madeira-100 text-xs sm:text-sm">
+                    ${rowsHtml}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    /**
+     * =========================================================================
+     * 7. ABA 2 — CONSOLIDADO PARA IMPRESSÃO
+     * =========================================================================
+     */
+    function renderConsolidadoDayToggles() {
+      const container = document.getElementById('consolidado-days-toggles');
+      if (!container) return;
+      container.innerHTML = DAYS_CONFIG.map((d) => {
+        const checked = state.consolidadoDays.includes(d.key);
+        return `
+          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer transition ${
+            checked
+              ? 'bg-vinho-800 text-white border-vinho-900'
+              : 'bg-madeira-50 text-madeira-700 border-madeira-300 hover:bg-madeira-100'
+          }">
+            <input
+              type="checkbox"
+              ${checked ? 'checked' : ''}
+              onchange="toggleConsolidadoDay('${d.key}', this.checked)"
+              class="hidden"
+            />
+            <span>${d.short}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function toggleConsolidadoDay(dayKey, isChecked) {
+      if (isChecked && !state.consolidadoDays.includes(dayKey)) {
+        state.consolidadoDays.push(dayKey);
+      } else if (!isChecked) {
+        state.consolidadoDays = state.consolidadoDays.filter((k) => k !== dayKey);
+      }
+      saveState();
+      renderConsolidadoDayToggles();
+      renderConsolidado();
+    }
+
+    function selectAllConsolidadoDays(selectAll) {
+      state.consolidadoDays = selectAll ? DAYS_CONFIG.map((d) => d.key) : [];
+      saveState();
+      renderConsolidadoDayToggles();
+      renderConsolidado();
+    }
+
+    function computeConsolidatedRows() {
+      const map = new Map();
+      let totalGuests = 0;
+
+      DAYS_CONFIG.forEach((d) => {
+        if (!state.consolidadoDays.includes(d.key)) return;
+        const dayObj = ensureDayStructure(d.key);
+        totalGuests += (Number(dayObj.guests?.ALMOCO) || 0) + (Number(dayObj.guests?.JANTAR) || 0);
+
+        ['ALMOCO', 'JANTAR'].forEach((shift) => {
+          (dayObj[shift] || []).forEach((item) => {
+            const catItem = findCatalogItem(item.code);
+            const groupKey = catItem ? `CODE::${catItem.code}` : `UNMAPPED::${item.rawLabel || 'SEM_NOME'}`;
+
+            if (!map.has(groupKey)) {
+              map.set(groupKey, {
+                code: catItem ? catItem.code : 'S/CÓD',
+                isMapped: Boolean(catItem),
+                description: catItem ? catItem.description : (item.rawLabel || 'Item sem código'),
+                category: catItem ? catItem.category : 'Sem código',
+                unit: catItem ? catItem.unit : 'KG',
+                almoco: 0,
+                jantar: 0,
+                total: 0,
+                notes: new Set(),
+                daysSet: new Set()
+              });
+            }
+
+            const entry = map.get(groupKey);
+            const qty = parseQtyInput(item.qty);
+            if (shift === 'ALMOCO') entry.almoco += qty;
+            if (shift === 'JANTAR') entry.jantar += qty;
+            entry.total = entry.almoco + entry.jantar;
+            if (qty > 0) entry.daysSet.add(d.short);
+            if (item.note && item.note.trim()) entry.notes.add(item.note.trim());
+          });
+        });
+      });
+
+      const rows = Array.from(map.values()).map((r) => ({
+        ...r,
+        obsText: [
+          r.notes.size > 0 ? Array.from(r.notes).join('; ') : '',
+          r.daysSet.size > 0 && r.daysSet.size < state.consolidadoDays.length
+            ? `Dias: ${Array.from(r.daysSet).join(', ')}`
+            : ''
+        ]
+          .filter(Boolean)
+          .join(' • ')
+      }));
+
+      rows.sort((a, b) => {
+        if (a.isMapped && !b.isMapped) return -1;
+        if (!a.isMapped && b.isMapped) return 1;
+        return String(a.code).localeCompare(String(b.code), 'pt-BR', { numeric: true });
+      });
+
+      return { rows, totalGuests };
+    }
+
+    function renderConsolidado() {
+      renderConsolidadoDayToggles();
+
+      const { rows, totalGuests } = computeConsolidatedRows();
+      const catFilter = document.getElementById('consolidado-category-filter')?.value || 'TODAS';
+      const query = (document.getElementById('consolidado-search-input')?.value || '').trim().toLowerCase();
+      const onlyPositive = document.getElementById('consolidado-only-positive')?.checked ?? true;
+
+      const filtered = rows.filter((r) => {
+        if (onlyPositive && r.total <= 0) return false;
+        if (catFilter === 'SEM_CODIGO' && r.isMapped) return false;
+        if (catFilter !== 'TODAS' && catFilter !== 'SEM_CODIGO' && r.category !== catFilter) return false;
+        if (query) {
+          const hay = `${r.code} ${r.description} ${r.category} ${r.obsText}`.toLowerCase();
+          if (!hay.includes(query)) return false;
+        }
+        return true;
+      });
+
+      const sumAlmoco = filtered.reduce((acc, r) => acc + r.almoco, 0);
+      const sumJantar = filtered.reduce((acc, r) => acc + r.jantar, 0);
+      const sumTotal = filtered.reduce((acc, r) => acc + r.total, 0);
+
+      document.getElementById('kpi-almoco-kg').textContent = `${formatNumberBR(sumAlmoco)} KG`;
+      document.getElementById('kpi-jantar-kg').textContent = `${formatNumberBR(sumJantar)} KG`;
+      document.getElementById('kpi-total-kg').textContent = `${formatNumberBR(sumTotal)} KG`;
+      document.getElementById('kpi-items-count').textContent = filtered.length;
+
+      const selectedLabels = DAYS_CONFIG.filter((d) => state.consolidadoDays.includes(d.key)).map((d) => d.label);
+      document.getElementById('print-period-label').textContent =
+        `${state.weekReference || 'Programação'} — ${
+          selectedLabels.length === 7
+            ? 'Semana Completa (Segunda a Domingo)'
+            : selectedLabels.length > 0
+            ? selectedLabels.join(', ')
+            : 'Nenhum dia selecionado'
+        }`;
+
+      document.getElementById('print-generated-at').textContent = new Date().toLocaleString('pt-BR');
+      document.getElementById('print-total-guests').textContent = formatNumberBR(totalGuests, 0);
+
+      const tbody = document.getElementById('consolidado-table-body');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-10 px-4 text-center text-madeira-500">
+              Nenhuma quantidade lançada para os filtros selecionados. Preencha as quantidades na aba <strong>1. Lançamento Dia / Turno</strong>.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered
+        .map(
+          (r) => `
+          <tr class="${!r.isMapped ? 'bg-amber-50/80' : 'hover:bg-madeira-50/60'}">
+            <td class="py-2.5 px-3 font-mono font-extrabold whitespace-nowrap ${
+              r.isMapped ? 'text-vinho-900' : 'text-amber-900 bg-amber-100/70'
+            }">
+              ${escapeHtml(r.code)}
+            </td>
+            <td class="py-2.5 px-3 font-semibold text-madeira-900">${escapeHtml(r.description)}</td>
+            <td class="py-2.5 px-3 text-xs text-madeira-600 whitespace-nowrap">${escapeHtml(r.category)}</td>
+            <td class="py-2.5 px-3 text-right font-medium text-madeira-800 whitespace-nowrap">${formatNumberBR(r.almoco)}</td>
+            <td class="py-2.5 px-3 text-right font-medium text-madeira-800 whitespace-nowrap">${formatNumberBR(r.jantar)}</td>
+            <td class="py-2.5 px-3 text-right font-extrabold text-vinho-900 whitespace-nowrap">${formatNumberBR(r.total)}</td>
+            <td class="py-2.5 px-3 text-center text-xs font-bold text-madeira-700 whitespace-nowrap">${escapeHtml(r.unit)}</td>
+            <td class="py-2.5 px-3 text-xs text-madeira-600">${escapeHtml(r.obsText || '—')}</td>
+          </tr>
+        `
+        )
+        .join('');
+    }
+
+    function triggerPrintReport() {
+      renderConsolidado();
+      setTimeout(() => {
+        window.print();
+      }, 120);
+    }
+
+    function copyConsolidatedForSecretariat() {
+      const { rows } = computeConsolidatedRows();
+      const activeRows = rows.filter((r) => r.total > 0);
+      if (activeRows.length === 0) {
+        showToast('Não há itens com quantidade maior que zero para copiar.', 'warning');
+        return;
+      }
+
+      const lines = [
+        `SOLICITAÇÃO DE COMPRAS — AÇOUGUE (${state.weekReference || 'Semana'})`,
+        '------------------------------------------------------------',
+        ...activeRows.map(
+          (r) => `${r.code} | ${r.description} | Total: ${formatNumberBR(r.total)} ${r.unit}${r.obsText ? ' | Obs: ' + r.obsText : ''}`
+        )
+      ];
+
+      const ta = document.createElement('textarea');
+      ta.value = lines.join('\n');
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Lista consolidada copiada para a secretaria!');
+      } catch (_) {
+        showToast('Não foi possível copiar automaticamente.', 'error');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function exportConsolidadoCSV() {
+      const { rows } = computeConsolidatedRows();
+      const positiveRows = rows.filter((r) => r.total > 0);
+      if (positiveRows.length === 0) {
+        showToast('Não há itens com quantidade maior que zero para exportar.', 'warning');
+        return;
+      }
+
+      const headers = ['Codigo', 'Descricao', 'Categoria', 'Almoco', 'Jantar', 'Total_Geral', 'Unidade', 'Observacoes'];
+      const csvLines = [
+        headers.join(';'),
+        ...positiveRows.map((r) =>
+          [
+            r.code,
+            r.description,
+            r.category,
+            formatNumberBR(r.almoco),
+            formatNumberBR(r.jantar),
+            formatNumberBR(r.total),
+            r.unit,
+            r.obsText || ''
+          ]
+            .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+            .join(';')
+        )
+      ];
+
+      downloadFile('\uFEFF' + csvLines.join('\n'), 'consolidado_acougue_secretaria.csv', 'text/csv;charset=utf-8;');
+      showToast('CSV exportado para a secretaria!');
+    }
+
+    /**
+     * =========================================================================
+     * 8. ABA 3 — BASE DE CÓDIGOS (75 ITENS)
+     * =========================================================================
+     */
+    function renderCatalogTable() {
+      const tbody = document.getElementById('catalog-table-body');
+      if (!tbody) return;
+
+      const query = (document.getElementById('catalog-search-input')?.value || '').trim().toLowerCase();
+      const catFilter = document.getElementById('catalog-category-filter')?.value || 'TODAS';
+
+      const filtered = state.catalog.filter((item) => {
+        if (catFilter !== 'TODAS' && item.category !== catFilter) return false;
+        if (!query) return true;
+        return `${item.code} ${item.description} ${item.category} ${item.unit}`.toLowerCase().includes(query);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-8 px-4 text-center text-madeira-500">
+              Nenhum código encontrado com o filtro aplicado.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered
+        .map((item) => {
+          const realIdx = state.catalog.findIndex((c) => c === item);
+          return `
+            <tr class="hover:bg-madeira-50/70">
+              <td class="py-3 px-4 font-mono font-extrabold text-vinho-900 whitespace-nowrap">${escapeHtml(item.code)}</td>
+              <td class="py-3 px-4 font-semibold text-madeira-900">${escapeHtml(item.description)}</td>
+              <td class="py-3 px-4 text-xs text-madeira-700 whitespace-nowrap">${escapeHtml(item.category)}</td>
+              <td class="py-3 px-4 text-center text-xs font-bold text-madeira-800 whitespace-nowrap">${escapeHtml(item.unit)}</td>
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <button
+                  type="button"
+                  onclick="openCatalogItemModal(${realIdx})"
+                  class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-madeira-100 hover:bg-madeira-200 text-madeira-800 cursor-pointer"
+                >
+                  Editar
+                </button>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    function openCatalogItemModal(index = null) {
+      const isEdit = index !== null && state.catalog[index];
+      const item = isEdit ? state.catalog[index] : { code: '', description: '', category: 'Carnes', unit: 'KG' };
+
+      openModal(`
+        <div>
+          <h3 class="text-lg font-extrabold text-vinho-900">${isEdit ? 'Editar Código da Base' : 'Novo Código de Proteína'}</h3>
+          <p class="text-xs text-madeira-600 mt-0.5">Mantenha o código exatamente igual ao utilizado no sistema da secretaria.</p>
+        </div>
+        <div class="space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-madeira-800 mb-1">Código do Item *</label>
+              <input id="cat-code-input" type="text" value="${escapeHtml(item.code)}" placeholder="Ex.: 102035" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm font-mono" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-madeira-800 mb-1">Unidade</label>
+              <select id="cat-unit-input" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm">
+                <option value="KG" ${item.unit === 'KG' ? 'selected' : ''}>KG</option>
+                <option value="PA" ${item.unit === 'PA' ? 'selected' : ''}>PA</option>
+                <option value="UN" ${item.unit === 'UN' ? 'selected' : ''}>UN</option>
+                <option value="CX" ${item.unit === 'CX' ? 'selected' : ''}>CX</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-madeira-800 mb-1">Descrição Oficial *</label>
+            <input id="cat-desc-input" type="text" value="${escapeHtml(item.description)}" placeholder="Ex.: PICANHA BOVINA ((CONGELADA))" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-madeira-800 mb-1">Categoria</label>
+            <select id="cat-category-input" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm">
+              <option value="Carnes" ${item.category === 'Carnes' ? 'selected' : ''}>Carnes</option>
+              <option value="Aves" ${item.category === 'Aves' ? 'selected' : ''}>Aves</option>
+              <option value="Peixes e Frutos Mar" ${item.category === 'Peixes e Frutos Mar' ? 'selected' : ''}>Peixes e Frutos Mar</option>
+              <option value="Embutidos / Outros" ${item.category === 'Embutidos / Outros' ? 'selected' : ''}>Embutidos / Outros</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-madeira-100 hover:bg-madeira-200 text-madeira-800 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" onclick="saveCatalogItem(${isEdit ? index : 'null'})" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-terracotta-600 hover:bg-terracotta-700 text-white cursor-pointer">
+            Salvar
+          </button>
+        </div>
+      `);
+    }
+
+    function saveCatalogItem(index) {
+      const code = document.getElementById('cat-code-input').value.trim();
+      const description = document.getElementById('cat-desc-input').value.trim();
+      const category = document.getElementById('cat-category-input').value;
+      const unit = document.getElementById('cat-unit-input').value;
+
+      if (!code || !description) {
+        showToast('Preencha o código e a descrição do item.', 'error');
+        return;
+      }
+
+      const newObj = { code, description, category, unit };
+      if (index !== null && state.catalog[index]) {
+        state.catalog[index] = newObj;
+        showToast('Código atualizado na base!');
+      } else {
+        state.catalog.push(newObj);
+        showToast('Novo código adicionado à base!');
+      }
+
+      saveState();
+      closeModal();
+      renderCatalogTable();
+      populateAddItemDropdown();
+      renderDayItems();
+    }
+
+    function exportCatalogJSON() {
+      downloadFile(JSON.stringify(state.catalog, null, 2), 'base_codigos_proteinas.json', 'application/json');
+      showToast('Base de códigos exportada em JSON!');
+    }
+
+    function handleImportCatalogFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = String(e.target.result || '');
+          if (file.name.toLowerCase().endsWith('.json')) {
+            const parsed = JSON.parse(text);
+            if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('JSON inválido');
+            state.catalog = parsed
+              .map((row) => ({
+                code: String(row.code || '').trim(),
+                description: String(row.description || '').trim(),
+                category: String(row.category || 'Carnes').trim(),
+                unit: String(row.unit || 'KG').trim()
+              }))
+              .filter((r) => r.code && r.description);
+          } else {
+            const lines = text.split(/\r?\n/).filter((l) => l.trim());
+            const imported = [];
+            for (let i = 0; i < lines.length; i++) {
+              const sep = lines[i].includes(';') ? ';' : ',';
+              const cols = lines[i].split(sep).map((c) => c.replace(/^"|"$/g, '').trim());
+              if (i === 0 && cols[0].toLowerCase().includes('cod')) continue;
+              if (cols.length >= 2 && cols[0] && cols[1]) {
+                imported.push({
+                  code: cols[0],
+                  description: cols[1],
+                  category: cols[2] || 'Carnes',
+                  unit: cols[3] || 'KG'
+                });
+              }
+            }
+            if (imported.length === 0) throw new Error('Nenhuma linha válida no CSV');
+            state.catalog = imported;
+          }
+
+          saveState();
+          renderCatalogTable();
+          populateAddItemDropdown();
+          renderDayItems();
+          showToast(`Base atualizada com ${state.catalog.length} itens!`);
+        } catch (err) {
+          console.error(err);
+          showToast('Erro ao importar arquivo. Verifique o formato JSON ou CSV.', 'error');
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+      event.target.value = '';
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    /**
+     * =========================================================================
+     * 9. INICIALIZAÇÃO
+     * =========================================================================
+     */
+    function renderAll() {
+      updateCatalogCountBadge();
+      updateUnmappedBadge();
+      switchTab(state.activeTab || 'lancamento');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>
