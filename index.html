@@ -370,7 +370,7 @@
             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
             <line x1="7" y1="7" x2="7.01" y2="7"/>
           </svg>
-          3. Base de Códigos ( <span id="catalog-count-label">75</span> )
+          3. Base de Códigos ( <span id="catalog-count-label">133</span> )
         </button>
 
         <button
@@ -1038,92 +1038,143 @@
 
     /**
      * =========================================================================
-     * 1. BASE DE 75 CÓDIGOS (Pasta1.xlsx)
+     * 1. BASE DE CADASTRO (cadastro item.xlsx)
      * =========================================================================
      */
     const INITIAL_CATALOG = [
-      // Carnes (32)
-      { code: '102001', description: 'ALCATRA MIOLO / Cx 20kg', category: 'Carnes', unit: 'KG' },
-      { code: '102076', description: 'BISTECA SUINA SEM PELE / cx 18 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102117', description: 'CARNE SECA / Cx 30 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102009', description: 'COELHO CONGELADO', category: 'Carnes', unit: 'KG' },
-      { code: '102003', description: 'CONTRA FILET SEM OSSO / Cx 20kg', category: 'Carnes', unit: 'KG' },
-      { code: '102080', description: 'COSTELA BOVINA INTEIRA / Cx 20kg', category: 'Carnes', unit: 'KG' },
-      { code: '102011', description: 'COSTELA SUINA FRESCA / Cx 18kg', category: 'Carnes', unit: 'KG' },
-      { code: '102012', description: 'COSTELINHA SUINA DEF. / cx 15 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102082', description: 'COXÃO DURO / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102013', description: 'COXÃO MOLE PEÇA INT / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102083', description: 'CUPIM / Pç 6 kg / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102037', description: 'FILET MIGNON S/ CORDAO / cx 15 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102014', description: 'FRALDINHA / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102093', description: 'FRANCHED RACK/OVINO / cx 7 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102120', description: 'LINGUA SUINA SALGADA / cx 5kg', category: 'Carnes', unit: 'KG' },
-      { code: '102019', description: 'LOMBO SUINO S/PELE / cx 15 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102071', description: 'MAMINHA MATURADA / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102022', description: 'OSSO BUCO / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102025', description: 'PÉ DE PORCO SALGADO / cx 5 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102026', description: 'PERNIL DE CORDEIRO C/ OSSO/cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102116', description: 'PERNIL DE SUINO S/OSSO / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102027', description: 'PERNIL SUINO COM OSSO/ cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102035', description: 'PICANHA BOVINA ((CONGELADA))', category: 'Carnes', unit: 'KG' },
-      { code: '102069', description: 'RABO BOVINO/ cx 5kg', category: 'Carnes', unit: 'KG' },
-      { code: '102031', description: 'RABO DE PORCO SALG. / cx 5 kg', category: 'Carnes', unit: 'KG' },
-      { code: '102063', description: 'TOUCINHO / cx 20 kg', category: 'Carnes', unit: 'KG' },
-      { code: '812378', description: 'ACÉM BOVINO PEÇA INTEIRA S/ OSSO', category: 'Carnes', unit: 'KG' },
-      { code: '25254', description: 'PATINHO BOVINO ANGUS', category: 'Carnes', unit: 'KG' },
-      { code: '25313', description: 'PANCETA', category: 'Carnes', unit: 'KG' },
-      { code: '25284', description: 'PEITO BOVINO', category: 'Carnes', unit: 'KG' },
-      { code: '25285', description: 'CORAÇÃO DA PALETA', category: 'Carnes', unit: 'KG' },
-      { code: '25081', description: 'PALETA DE CORDEIRO', category: 'Carnes', unit: 'KG' },
-
-      // Aves (9)
-      { code: '103001', description: 'CHESTER / cx 20 kg', category: 'Aves', unit: 'KG' },
-      { code: '103013', description: 'CODORNA CONG. / cx 3kg', category: 'Aves', unit: 'KG' },
-      { code: '103014', description: 'CORAÇÃO DE FRANGO CONG./cx12kg', category: 'Aves', unit: 'KG' },
-      { code: '103003', description: 'COXA SOBRE COXA C/ OSSO/ cx20kg', category: 'Aves', unit: 'KG' },
-      { code: '103002', description: 'COXA SOBRE COXA DESSOSADA 20kg', category: 'Aves', unit: 'KG' },
-      { code: '103005', description: 'PATO/ cx15kg', category: 'Aves', unit: 'KG' },
-      { code: '103006', description: 'PEITO DE FRANGO S/ OSSO / cx20kg', category: 'Aves', unit: 'KG' },
-      { code: '25118', description: 'COXA SOBRE COXA DE PATO DESSO.', category: 'Aves', unit: 'KG' },
-      { code: '103015', description: 'GALETO CONGELADO', category: 'Aves', unit: 'KG' },
-
-      // Peixes e Frutos Mar (26)
-      { code: '104002', description: 'ATUM EM FILET / cx 10kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104056', description: 'BACALHAU DO PORTO MORRUA / cx 25 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108067', description: 'CAMARAO 20X1 / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108070', description: 'CAMARAO 30X1 / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108068', description: 'CAMARÃO 40X1 / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108047', description: 'CAMARAO 7 BARBAS LIMPO / cx 16kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108048', description: 'CARNE DE SIRI *PURA* / pct 1 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108046', description: 'CAUDA DE LAGOSTA / cx 20kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108049', description: 'CONCHA DE VIERA LIMPA', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108088', description: 'FILE DE BACALHAU / cx 15 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '717304', description: 'FILE DE MERLUZÃO / cx 20 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108052', description: 'FILE DE PINTADO / cx 20kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108058', description: 'HADDOCK DEF. *PESC. AMAR. DEF.*/ pct 2kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104024', description: 'KANI KAMA / cx 5kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104023', description: 'LINGUADO EM FILET / cx 20kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104030', description: 'LULA EM TUBOS / cx 10kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104028', description: 'MARISCO 1/2 CASCA / cx 5 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104044', description: 'PESCADA AMARELA EM FILET/ cx 25 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '102043', description: 'POLVO CONGELADO', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104046', description: 'SALMÃO EM FILET / cx 25kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104052', description: 'TRUTA EM FILET / cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104054', description: 'VONGOLE / pct 1 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '104065', description: 'FILE DE TILAPIA cx 10 kg', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108077', description: 'CAÇAO EM POSTA', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '108096', description: 'TENTACULOS DE POLVO', category: 'Peixes e Frutos Mar', unit: 'KG' },
-      { code: '10303', description: 'LOMBO PIRARUCU', category: 'Peixes e Frutos Mar', unit: 'KG' },
-
-      // Embutidos / Outros (8)
-      { code: '106002', description: 'BACON EM MANTA / cx 12kg', category: 'Embutidos / Outros', unit: 'KG' },
-      { code: '106001', description: 'BACON FATIADO / cx 4,5kg', category: 'Embutidos / Outros', unit: 'KG' },
-      { code: '102097', description: 'LINGUIÇA CALABRESA DEF. / cx 7,5kg', category: 'Embutidos / Outros', unit: 'KG' },
-      { code: '106005', description: 'LINGUIÇA DE PAIO / cx 7,5 kg', category: 'Embutidos / Outros', unit: 'KG' },
-      { code: '106004', description: 'LINGUIÇA TOSCANA PURA/ cx 10kg', category: 'Embutidos / Outros', unit: 'KG' },
-      { code: '106017', description: 'SALSICHA HOT-DOG/ cx 20kg', category: 'Embutidos / Outros', unit: 'KG' },
-      { code: '106020', description: 'SALAME PEPPERONI / cx 3 kg', category: 'Embutidos / Outros', unit: 'KG' },
-      { code: '802025', description: 'PALITO PARA ESPETO CHURRASCO', category: 'Embutidos / Outros', unit: 'PA' }
+      { code: null, description: "FRALDINHA RED ANGUS", category: "Carnes", unit: "KG" },
+      { code: "812378", description: "ACÉM BOVINO PEÇA INTEIRA S/ OSSO", category: "Carnes", unit: "KG" },
+      { code: "102001", description: "ALCATRA MIOLO / Cx 20kg", category: "Carnes", unit: "KG" },
+      { code: "102076", description: "BISTECA SUINA SEM PELE / cx 18 kg", category: "Carnes", unit: "KG" },
+      { code: "102117", description: "CARNE SECA / Cx 30 kg", category: "Carnes", unit: "KG" },
+      { code: "102009", description: "COELHO / Cx 6 Kg", category: "Carnes", unit: "KG" },
+      { code: "102003", description: "CONTRA FILET SEM OSSO / Cx 20kg", category: "Carnes", unit: "KG" },
+      { code: "25285", description: "CORAÇÃO DA PALETA", category: "Carnes", unit: "KG" },
+      { code: "102080", description: "COSTELA BOVINA INTEIRA / Cx 20kg", category: "Carnes", unit: "KG" },
+      { code: "102011", description: "COSTELA SUINA FRESCA / Cx 18kg", category: "Carnes", unit: "KG" },
+      { code: "102012", description: "COSTELINHA SUINA DEF. / cx 15 kg", category: "Carnes", unit: "KG" },
+      { code: "102082", description: "COXÃO DURO / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102013", description: "COXÃO MOLE PEÇA INT / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102083", description: "CUPIM / Pç 6 kg / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102037", description: "FILET MIGNON S/ CORDAO / cx 15 kg", category: "Carnes", unit: "KG" },
+      { code: "102014", description: "FRALDINHA / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102093", description: "FRANCHED RACK/OVINO / cx 7 kg", category: "Carnes", unit: "KG" },
+      { code: "102120", description: "LINGUA SUINA SALGADA / cx 5kg", category: "Carnes", unit: "KG" },
+      { code: "102019", description: "LOMBO SUINO S/PELE / cx 15 kg", category: "Carnes", unit: "KG" },
+      { code: "102071", description: "MAMINHA MATURADA / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102022", description: "OSSO BUCO / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "25081", description: "PALETA DE CORDEIRO", category: "Carnes", unit: "KG" },
+      { code: "25254", description: "PATINHO BOVINO ANGUS", category: "Carnes", unit: "KG" },
+      { code: "102025", description: "PÉ DE PORCO SALGADO / cx 5 kg", category: "Carnes", unit: "KG" },
+      { code: "25284", description: "PEITO BOVINO", category: "Carnes", unit: "KG" },
+      { code: null, description: "SHORT RIB", category: "Carnes", unit: "KG" },
+      { code: "102026", description: "PERNIL DE CORDEIRO C/ OSSO/cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102116", description: "PERNIL DE SUINO S/OSSO / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102027", description: "PERNIL SUINO COM OSSO/ cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: "102035", description: "PICANHA BOVINA ((CONGELADA))", category: "Carnes", unit: "KG" },
+      { code: "102069", description: "RABO BOVINO/ cx 5kg", category: "Carnes", unit: "KG" },
+      { code: "102031", description: "RABO DE PORCO SALG. / cx 5 kg", category: "Carnes", unit: "KG" },
+      { code: "102063", description: "TOUCINHO / cx 20 kg", category: "Carnes", unit: "KG" },
+      { code: null, description: "ENTRECOT BLACK ANGUS", category: "Carnes", unit: "KG" },
+      { code: null, description: "PANCETTA", category: "Carnes", unit: "KG" },
+      { code: "103001", description: "CHESTER / cx 20 kg", category: "Aves", unit: "KG" },
+      { code: "103013", description: "CODORNA CONG. / cx 3kg", category: "Aves", unit: "KG" },
+      { code: "103014", description: "CORAÇÃO DE FRANGO CONG./cx 12kg", category: "Aves", unit: "KG" },
+      { code: "103003", description: "COXA SOBRE COXA C/ OSSO/ cx 20kg", category: "Aves", unit: "KG" },
+      { code: "103002", description: "COXA SOBRE COXA DESSOSADA 20kg", category: "Aves", unit: "KG" },
+      { code: "103005", description: "PATO / cx 15kg", category: "Aves", unit: "KG" },
+      { code: "103006", description: "PEITO DE FRANGO S/ OSSO / cx 20kg", category: "Aves", unit: "KG" },
+      { code: "102051", description: "PEITO DE PERU CONG. /cx 20kg", category: "Aves", unit: "KG" },
+      { code: "103011", description: "FRANGO INTEIRO", category: "Aves", unit: "KG" },
+      { code: null, description: "BATATA PALITO TRADICIONAL", category: "Aves", unit: "KG" },
+      { code: "106002", description: "BACON EM MANTA / cx 12kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "106001", description: "BACON FATIADO / cx 4,5kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102097", description: "LINGUIÇA CALABRESA DEF. / cx 7,5kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "106005", description: "LINGUIÇA DE PAIO / cx 7,5 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "106019", description: "LINGUIÇA TOSCANA PURA/ cx 10kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102111", description: "SALSICHA HOT-DOG/ cx 20kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "106020", description: "SALAME PEPPERONI / cx 3 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "802025", description: "PALITO PARA ESPETO CHURRASCO", category: "Embutidos / Outros", unit: "PA" },
+      { code: null, description: "LEITÃO INTEIRO", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "ONION RING", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "MANDIOCA", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "BOLINHO DE BACALHAU", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "DADINHO DE TAPIOCA", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "MINI COXINHA DE FRANGO", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102087", description: "ESPETO DE CARNE", category: "Embutidos / Outros", unit: "KG" },
+      { code: "25252", description: "ESPETO DE FRANGO", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "ESPETO DE LINGUIÇA", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "PANCETA", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "BOLINHO DE COSTELA", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "ESPETO DE FRANGO", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "PRESUNTO", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "MUSSARELA", category: "Embutidos / Outros", unit: "KG" },
+      { code: "71046", description: "BATATA PALITO COM CASCA", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "NUGGETS", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "LINQUIÇA COQUETEL", category: "Embutidos / Outros", unit: "KG" },
+      { code: "104004", description: "BACALHAU SALGADO", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104002", description: "ATUM EM FILET / cx 10kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "102043", description: "POLVO CONGELADO", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104004", description: "BACALHAU DESFIADO", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "108077", description: "CAÇAO EM POSTA", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "21108", description: "CAMARAO 20X30 / cx 10 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "21112", description: "CAMARAO 40X60 / cx 10 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "21111", description: "CAMARÃO 11/15", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "108047", description: "CAMARAO 7 BARBAS LIMPO / cx 16kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104012", description: "CARNE DE SIRI *PURA* / pct 1 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "108046", description: "CAUDA DE LAGOSTA / cx 20kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "108049", description: "CONCHA DE VIERA LIMPA", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "108088", description: "FILE DE BACALHAU / cx 15 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "717304", description: "FILE DE MERLUZÃO / cx 20 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104065", description: "FILE DE TILAPIA cx 10 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "108058", description: "HADDOCK DEF. *PESC. AMAR. DEF.*/ pct 2kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104024", description: "KANI KAMA / cx 5kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104023", description: "LINGUADO EM FILET / cx 20kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104030", description: "LULA EM TUBOS / cx 10kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104028", description: "MARISCO 1/2 CASCA / cx 5 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104044", description: "PESCADA AMARELA EM FILET/ cx 25 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104046", description: "SALMÃO EM FILET / cx 25kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "108087", description: "FILE DE PIRARUCU", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104054", description: "VONGOLE / pct 1 kg", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104033", description: "NAMORADO EM FILET", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "104020", description: "DOURADO EM FILE", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: null, description: "CABEÇA DE LULA", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "25237", description: "ASSADO DE TIRA", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: null, description: "MAMINHA RED ANGUS", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "103021", description: "COXINHA DA ASA", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "25233", description: "TULIPA DE FRANGO", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "80141", description: "LINGÜIÇA MORCILHA", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "102096", description: "LINGÜIÇA ALHEIRA", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "80002", description: "CERVELÁ", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: null, description: "LAGARTO", category: "Peixes e Frutos Mar", unit: "KG" },
+      { code: "102087", description: "ESPETO DE CARNE", category: "Embutidos / Outros", unit: "KG" },
+      { code: "25252", description: "ESPETO DE FRANGO", category: "Embutidos / Outros", unit: "KG" },
+      { code: "104065", description: "FILE DE TILAPIA cx 10 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "103006", description: "PEITO DE FRANGO S/ OSSO / cx 20kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "103003", description: "COXA SOBRE COXA C/ OSSO/ cx 20kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "103002", description: "COXA SOBRE COXA DESSOSADA 20kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "106019", description: "LINGUIÇA TOSCANA PURA/ cx 10kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102025", description: "PÉ DE PORCO SALGADO / cx 5 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "812378", description: "ACÉM BOVINO PEÇA INTEIRA S/ OSSO", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102097", description: "LINGUIÇA CALABRESA DEF. / cx 7,5kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "106005", description: "LINGUIÇA DE PAIO / cx 7,5 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102031", description: "RABO DE PORCO SALG. / cx 5 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102117", description: "CARNE SECA / Cx 30 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102011", description: "COSTELA SUINA FRESCA / Cx 18kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102012", description: "COSTELINHA SUINA DEF. / cx 15 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102019", description: "LOMBO SUINO S/PELE / cx 15 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102082", description: "COXÃO DURO / cx 20 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102120", description: "LINGUA SUINA SALGADA / cx 5kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102080", description: "COSTELA BOVINA INTEIRA / Cx 20kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102083", description: "CUPIM / Pç 6 kg / cx 20 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "106002", description: "BACON EM MANTA / cx 12kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102120", description: "LINGUA SUINA SALGADA / cx 5kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102082", description: "COXÃO DURO / cx 20 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102116", description: "PERNIL DE SUINO S/OSSO / cx 20 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102027", description: "PERNIL SUINO COM OSSO/ cx 20 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: "103011", description: "FRANGO INTEIRO", category: "Embutidos / Outros", unit: "KG" },
+      { code: "102019", description: "LOMBO SUINO S/PELE / cx 15 kg", category: "Embutidos / Outros", unit: "KG" },
+      { code: null, description: "MAMINHA", category: "Embutidos / Outros", unit: "KG" }
     ];
 
     /**
@@ -1647,7 +1698,7 @@
         <div>
           <h3 class="text-lg font-extrabold text-vinho-900">Restaurar Planilhas Originais?</h3>
           <p class="text-sm text-madeira-700 mt-1">
-            Isso irá restaurar os 75 códigos de <strong>Pasta1.xlsx</strong> e a grade completa de <strong>173 itens</strong> de <strong>CHECK LIST ACOUGUE.xlsx</strong>.
+            Isso irá restaurar os 133 itens de <strong>Pasta1.xlsx</strong> e a grade completa de <strong>173 itens</strong> de <strong>CHECK LIST ACOUGUE.xlsx</strong>.
           </p>
         </div>
         <div class="flex justify-end gap-2 pt-2">
@@ -1891,19 +1942,29 @@
       const currentVal = select.value;
       const sorted = [...state.catalog].sort((a, b) => a.description.localeCompare(b.description, 'pt-BR'));
       select.innerHTML = sorted
-        .map((item) => `<option value="${escapeHtml(item.code)}">[${escapeHtml(item.code)}] ${escapeHtml(item.description)} (${escapeHtml(item.unit)})</option>`)
+        .map((item, idx) => {
+          const codeLabel = item.code ? `[${escapeHtml(item.code)}]` : '[SEM CÓD.]';
+          const optVal = item.code ? String(item.code) : `__IDX__${idx}`;
+          return `<option value="${escapeHtml(optVal)}">${codeLabel} ${escapeHtml(item.description)} (${escapeHtml(item.unit)})</option>`;
+        })
         .join('');
-      if (currentVal && findCatalogItem(currentVal)) {
+      if (currentVal) {
         select.value = currentVal;
       }
     }
 
     function handleAddCatalogItemToDay() {
-      const code = document.getElementById('add-item-select').value;
+      const selectedVal = document.getElementById('add-item-select').value;
       const shift = document.getElementById('add-item-shift').value;
       const qty = parseQtyInput(document.getElementById('add-item-qty').value);
 
-      const catItem = findCatalogItem(code);
+      let catItem = null;
+      if (selectedVal && selectedVal.startsWith('__IDX__')) {
+        const idx = parseInt(selectedVal.replace('__IDX__', ''), 10);
+        catItem = state.catalog[idx] || null;
+      } else {
+        catItem = findCatalogItem(selectedVal);
+      }
       if (!catItem) {
         showToast('Selecione um item válido da base de códigos.', 'error');
         return;
@@ -3008,7 +3069,7 @@
 
     /**
      * =========================================================================
-     * 8. ABA 3 — BASE DE CÓDIGOS (75 ITENS)
+     * 8. ABA 3 — BASE DE CÓDIGOS (133 ITENS)
      * =========================================================================
      */
     function renderCatalogTable() {
@@ -3115,12 +3176,12 @@
       const category = document.getElementById('cat-category-input').value;
       const unit = document.getElementById('cat-unit-input').value;
 
-      if (!code || !description) {
-        showToast('Preencha o código e a descrição do item.', 'error');
+      if (!description) {
+        showToast('Preencha a descrição do item.', 'error');
         return;
       }
 
-      const newObj = { code, description, category, unit };
+      const newObj = { code: code || null, description, category, unit };
       if (index !== null && state.catalog[index]) {
         state.catalog[index] = newObj;
         showToast('Código atualizado na base!');
