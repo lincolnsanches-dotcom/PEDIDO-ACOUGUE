@@ -129,20 +129,23 @@
         margin: 0 !important;
       }
 
-      /* Modo padrão: imprime o Consolidado */
-      body:not(.printing-daily) #view-consolidado {
+      /* Modo padrão: imprime o Consolidado da Secretaria */
+      body:not(.printing-daily):not(.printing-weekly-butcher) #view-consolidado {
         display: block !important;
         margin: 0 !important;
       }
 
-      body:not(.printing-daily) #daily-print-sheet {
+      body:not(.printing-daily) #daily-print-sheet,
+      body:not(.printing-weekly-butcher) #weekly-butcher-sheet {
         display: none !important;
       }
 
-      /* Modo Ficha Diária do Açougueiro: oculta consolidado e imprime só a ficha do dia */
+      /* Modo Ficha Diária do Açougueiro */
       body.printing-daily #view-consolidado,
       body.printing-daily #view-lancamento,
-      body.printing-daily #view-codigos {
+      body.printing-daily #view-codigos,
+      body.printing-daily #view-historico,
+      body.printing-daily #weekly-butcher-sheet {
         display: none !important;
       }
 
@@ -151,6 +154,27 @@
         width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+      }
+
+      /* Modo Guia Semanal do Açougueiro */
+      body.printing-weekly-butcher #view-consolidado,
+      body.printing-weekly-butcher #view-lancamento,
+      body.printing-weekly-butcher #view-codigos,
+      body.printing-weekly-butcher #view-historico,
+      body.printing-weekly-butcher #daily-print-sheet {
+        display: none !important;
+      }
+
+      body.printing-weekly-butcher #weekly-butcher-sheet {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .butcher-day-block {
+        break-inside: avoid;
+        page-break-inside: avoid;
       }
 
       #print-area {
@@ -286,6 +310,14 @@
           </button>
           <button
             type="button"
+            onclick="openArchiveWeekModal()"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-vinho-800 hover:bg-vinho-900 border border-vinho-900 shadow-xs transition cursor-pointer"
+            title="Salva a semana atual no histórico para alimentar a per capita e inicia uma nova semana zerada"
+          >
+            Arquivar Semana &amp; Nova
+          </button>
+          <button
+            type="button"
             onclick="openResetModal()"
             class="px-3 py-1.5 rounded-xl text-xs font-semibold text-madeira-800 bg-madeira-100 hover:bg-madeira-200 border border-madeira-300 transition cursor-pointer"
           >
@@ -339,6 +371,19 @@
             <line x1="7" y1="7" x2="7.01" y2="7"/>
           </svg>
           3. Base de Códigos ( <span id="catalog-count-label">75</span> )
+        </button>
+
+        <button
+          id="tab-btn-historico"
+          type="button"
+          onclick="switchTab('historico')"
+          class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition cursor-pointer bg-madeira-100 text-madeira-800 hover:bg-madeira-200"
+        >
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          4. Histórico &amp; Per Capita ( <span id="history-count-label">0</span> )
         </button>
       </nav>
     </div>
@@ -427,19 +472,36 @@
 
         <div class="lg:col-span-4 bg-[#00463f] text-white rounded-2xl shadow-sm p-5 flex flex-col justify-between">
           <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-madeira-200">Resumo do Dia</span>
-            <div class="mt-2 flex items-baseline justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-madeira-200">Resumo do Dia &amp; Per Capita</span>
+            <div class="mt-1.5 flex items-baseline justify-between">
               <span class="text-3xl font-extrabold" id="day-total-kg">0,00</span>
               <span class="text-sm font-semibold text-madeira-200">KG no dia</span>
             </div>
             <p class="text-xs text-madeira-200/90 mt-1" id="day-shifts-breakdown">
               Almoço: 0,00 kg • Jantar: 0,00 kg
             </p>
+            <div id="day-percapita-box" class="mt-2.5 p-2.5 rounded-xl bg-white/10 border border-white/15 text-xs space-y-1">
+              <div id="day-percapita-actual" class="font-semibold text-amber-200">
+                Per capita atual: informe os hóspedes
+              </div>
+              <div id="day-percapita-history-hint" class="text-[11px] text-madeira-100">
+                Base histórica: aguardando semanas arquivadas
+              </div>
+            </div>
           </div>
 
-          <div class="mt-4 pt-3 border-t border-white/15 flex flex-col gap-2">
+          <div class="mt-3 pt-3 border-t border-white/15 flex flex-col gap-2">
             <span id="day-unmapped-warning" class="text-xs font-medium text-amber-200"></span>
             <div class="flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                id="btn-apply-history-percapita"
+                onclick="applyHistoricalPerCapitaToDay()"
+                class="hidden inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-emerald-400 text-madeira-950 hover:bg-emerald-300 text-xs font-extrabold transition cursor-pointer shrink-0 shadow-xs"
+                title="Preenche as quantidades do dia com base na per capita média das semanas arquivadas"
+              >
+                ⚡ Sugerir pelo Histórico
+              </button>
               <button
                 type="button"
                 onclick="triggerPrintDailySheet()"
@@ -584,6 +646,19 @@
             </button>
             <button
               type="button"
+              onclick="triggerPrintWeeklyButcherGuide()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-amber-300 hover:bg-amber-200 text-madeira-950 border border-amber-400 shadow-xs transition cursor-pointer"
+              title="Imprime a ordem de produção e cortes da semana para o açougueiro"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Guia Semanal do Açougue
+            </button>
+            <button
+              type="button"
               onclick="triggerPrintReport()"
               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-vinho-800 hover:bg-vinho-900 text-white shadow-xs transition cursor-pointer"
             >
@@ -592,7 +667,7 @@
                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
                 <rect x="6" y="14" width="12" height="8"/>
               </svg>
-              Imprimir / Salvar PDF
+              Imprimir Consolidado (SC)
             </button>
           </div>
         </div>
@@ -719,6 +794,7 @@
                 <th class="py-3 px-2 text-right">Jantar</th>
                 <th class="py-3 px-2 text-right">Total Geral</th>
                 <th class="py-3 px-2 text-center">Unid.</th>
+                <th class="py-3 px-2">Emb. / Caixas</th>
                 <th class="py-3 px-2 rounded-tr-xl">Dias</th>
               </tr>
             </thead>
@@ -826,8 +902,82 @@
       </div>
     </section>
 
+    <!-- ABA 4: HISTÓRICO DE SEMANAS & PER CAPITA AUTOMÁTICA -->
+    <section id="view-historico" class="hidden space-y-6 no-print">
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs p-4 sm:p-5">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-madeira-900">Histórico de Semanas &amp; Inteligência de Per Capita</h2>
+            <p class="text-xs sm:text-sm text-madeira-600">
+              Cada semana arquivada alimenta automaticamente a média de consumo (<strong>gramas por hóspede</strong>) por dia da semana, turno e proteína.
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onclick="openArchiveWeekModal()"
+              class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-vinho-800 hover:bg-vinho-900 text-white shadow-xs transition cursor-pointer"
+            >
+              + Arquivar Semana Atual
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-madeira-100 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-madeira-50 border border-madeira-200 p-3.5">
+            <span class="text-[11px] font-bold uppercase text-madeira-600">Semanas Arquivadas</span>
+            <p id="hist-kpi-weeks" class="text-xl font-extrabold text-vinho-900 mt-1">0</p>
+          </div>
+          <div class="rounded-xl bg-madeira-50 border border-madeira-200 p-3.5">
+            <span class="text-[11px] font-bold uppercase text-madeira-600">Per Capita Média Global</span>
+            <p id="hist-kpi-global-pc" class="text-xl font-extrabold text-madeira-900 mt-1">— g/hóspede</p>
+          </div>
+          <div class="rounded-xl bg-terracotta-50 border border-terracotta-200 p-3.5">
+            <span class="text-[11px] font-bold uppercase text-terracotta-800">Status do Aprendizado</span>
+            <p id="hist-kpi-status" class="text-xs font-bold text-terracotta-900 mt-1.5">
+              Arquive a 1ª semana com hóspedes preenchidos para ativar sugestões.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de Per Capita Aprendida por Dia e Turno -->
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs overflow-hidden">
+        <div class="px-4 sm:px-5 py-3.5 bg-madeira-50 border-b border-madeira-200">
+          <h3 class="text-sm sm:text-base font-bold text-madeira-900">Média Histórica de Consumo por Dia da Semana (g / hóspede)</h3>
+          <p class="text-xs text-madeira-600">Calculada automaticamente sobre as semanas arquivadas que possuem previsão de hóspedes.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-madeira-200 bg-white text-[11px] font-extrabold uppercase tracking-wider text-madeira-700">
+                <th class="py-3 px-4">Dia da Semana</th>
+                <th class="py-3 px-4 text-right">Amostras</th>
+                <th class="py-3 px-4 text-right">Per Capita Almoço</th>
+                <th class="py-3 px-4 text-right">Per Capita Jantar</th>
+                <th class="py-3 px-4 text-right">Per Capita Média Dia</th>
+              </tr>
+            </thead>
+            <tbody id="history-percapita-table-body" class="divide-y divide-madeira-100 text-xs sm:text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Lista de Semanas Arquivadas -->
+      <div class="bg-white rounded-2xl border border-madeira-200 shadow-xs overflow-hidden">
+        <div class="px-4 sm:px-5 py-3.5 bg-madeira-50 border-b border-madeira-200">
+          <h3 class="text-sm sm:text-base font-bold text-madeira-900">Semanas Arquivadas no Banco de Dados</h3>
+          <p class="text-xs text-madeira-600">Você pode clonar uma semana anterior como base para a programação atual ou excluir registros de teste.</p>
+        </div>
+        <div id="archived-weeks-list" class="divide-y divide-madeira-200"></div>
+      </div>
+    </section>
+
     <!-- FICHA DIÁRIA DO AÇOUGUEIRO (VISÍVEL APENAS NA IMPRESSÃO DIÁRIA) -->
     <section id="daily-print-sheet" class="hidden bg-white space-y-5"></section>
+
+    <!-- GUIA SEMANAL DO AÇOUGUEIRO (VISÍVEL APENAS NA IMPRESSÃO DO GUIA SEMANAL) -->
+    <section id="weekly-butcher-sheet" class="hidden bg-white space-y-5"></section>
   </main>
 
   <!-- Toast & Modal -->
@@ -1230,6 +1380,16 @@
      */
     const STORAGE_KEY = 'pedido_acougue_hotel_state_v6';
 
+    const QUICK_CUT_CHIPS = [
+      'Padrão',
+      'Em bifes',
+      'Em cubos',
+      'Em tiras',
+      'Moída',
+      'Peça inteira',
+      'Sem gordura'
+    ];
+
     function cloneDefaultState() {
       return {
         weekReference: 'Programação Semanal — Cozinha & Açougue',
@@ -1238,7 +1398,8 @@
         onlyUnmapped: false,
         consolidadoDays: DAYS_CONFIG.map((d) => d.key),
         catalog: JSON.parse(JSON.stringify(INITIAL_CATALOG)),
-        checklist: JSON.parse(JSON.stringify(FULL_STANDARD_CHECKLIST))
+        checklist: JSON.parse(JSON.stringify(FULL_STANDARD_CHECKLIST)),
+        history: []
       };
     }
 
@@ -1250,7 +1411,8 @@
         ...parsed,
         catalog: Array.isArray(parsed.catalog) && parsed.catalog.length > 0 ? parsed.catalog : fallback.catalog,
         checklist: parsed.checklist && typeof parsed.checklist === 'object' ? parsed.checklist : fallback.checklist,
-        consolidadoDays: Array.isArray(parsed.consolidadoDays) ? parsed.consolidadoDays : fallback.consolidadoDays
+        consolidadoDays: Array.isArray(parsed.consolidadoDays) ? parsed.consolidadoDays : fallback.consolidadoDays,
+        history: Array.isArray(parsed.history) ? parsed.history : []
       };
     }
 
@@ -1283,7 +1445,8 @@
           onlyUnmapped: state.onlyUnmapped,
           consolidadoDays: state.consolidadoDays,
           catalog: state.catalog,
-          checklist: state.checklist
+          checklist: state.checklist,
+          history: state.history || []
         },
         atualizado_em: new Date().toISOString()
       };
@@ -1303,6 +1466,7 @@
 
     function saveState() {
       updateCatalogCountBadge();
+      updateHistoryCountBadge();
       updateUnmappedBadge();
 
       try {
@@ -1514,7 +1678,7 @@
       state.activeTab = tabName;
       saveState();
 
-      ['lancamento', 'consolidado', 'codigos'].forEach((t) => {
+      ['lancamento', 'consolidado', 'codigos', 'historico'].forEach((t) => {
         const btn = document.getElementById(`tab-btn-${t}`);
         const view = document.getElementById(`view-${t}`);
         const isActive = t === tabName;
@@ -1531,6 +1695,12 @@
       if (tabName === 'consolidado') renderConsolidado();
       if (tabName === 'codigos') renderCatalogTable();
       if (tabName === 'lancamento') renderLancamentoView();
+      if (tabName === 'historico') renderHistoricoView();
+    }
+
+    function updateHistoryCountBadge() {
+      const el = document.getElementById('history-count-label');
+      if (el) el.textContent = (state.history || []).length;
     }
 
     function updateCatalogCountBadge() {
@@ -1602,6 +1772,117 @@
       const dayObj = ensureDayStructure(state.activeDay);
       dayObj.guests[shift] = Math.max(0, Math.floor(parseQtyInput(val)));
       saveState();
+      renderDaySummary();
+    }
+
+    function computeHistoricalPerCapitaStats() {
+      const history = Array.isArray(state.history) ? state.history : [];
+      const dayStats = {};
+      DAYS_CONFIG.forEach((d) => {
+        dayStats[d.key] = {
+          samples: 0,
+          almocoGramsPerGuestSum: 0,
+          almocoSamples: 0,
+          jantarGramsPerGuestSum: 0,
+          jantarSamples: 0,
+          itemPerCapita: {} // key: `${shift}::${codeOrLabel}` -> { gramsSum, count }
+        };
+      });
+
+      let globalGramsSum = 0;
+      let globalGuestsSum = 0;
+
+      history.forEach((weekEntry) => {
+        const snap = weekEntry?.checklist;
+        if (!snap) return;
+
+        DAYS_CONFIG.forEach((d) => {
+          const dObj = snap[d.key];
+          if (!dObj) return;
+          const st = dayStats[d.key];
+          let hadSample = false;
+
+          ['ALMOCO', 'JANTAR'].forEach((shift) => {
+            const guests = Number(dObj.guests?.[shift]) || 0;
+            const items = Array.isArray(dObj[shift]) ? dObj[shift] : [];
+            const totalKg = items.reduce((s, it) => s + parseQtyInput(it.qty), 0);
+
+            if (guests > 0 && totalKg > 0) {
+              hadSample = true;
+              const gramsPerGuest = (totalKg * 1000) / guests;
+              if (shift === 'ALMOCO') {
+                st.almocoGramsPerGuestSum += gramsPerGuest;
+                st.almocoSamples += 1;
+              } else {
+                st.jantarGramsPerGuestSum += gramsPerGuest;
+                st.jantarSamples += 1;
+              }
+              globalGramsSum += totalKg * 1000;
+              globalGuestsSum += guests;
+
+              items.forEach((it) => {
+                const q = parseQtyInput(it.qty);
+                if (q <= 0) return;
+                const itemKey = `${shift}::${it.code || it.rawLabel}`;
+                if (!st.itemPerCapita[itemKey]) {
+                  st.itemPerCapita[itemKey] = { gramsSum: 0, count: 0 };
+                }
+                st.itemPerCapita[itemKey].gramsSum += (q * 1000) / guests;
+                st.itemPerCapita[itemKey].count += 1;
+              });
+            }
+          });
+
+          if (hadSample) st.samples += 1;
+        });
+      });
+
+      const globalAvgGrams = globalGuestsSum > 0 ? globalGramsSum / globalGuestsSum : 0;
+      return { dayStats, globalAvgGrams, totalWeeks: history.length };
+    }
+
+    function applyHistoricalPerCapitaToDay() {
+      const dayObj = ensureDayStructure(state.activeDay);
+      const guestsAlmoco = Number(dayObj.guests?.ALMOCO) || 0;
+      const guestsJantar = Number(dayObj.guests?.JANTAR) || 0;
+
+      if (guestsAlmoco <= 0 && guestsJantar <= 0) {
+        showToast('Informe a previsão de hóspedes (Almoço ou Jantar) antes de aplicar a sugestão histórica.', 'warning');
+        return;
+      }
+
+      const { dayStats } = computeHistoricalPerCapitaStats();
+      const st = dayStats[state.activeDay];
+      if (!st || st.samples === 0) {
+        showToast('Ainda não há histórico arquivado para este dia da semana.', 'warning');
+        return;
+      }
+
+      let updatedItems = 0;
+      ['ALMOCO', 'JANTAR'].forEach((shift) => {
+        const guests = Number(dayObj.guests?.[shift]) || 0;
+        if (guests <= 0) return;
+
+        (dayObj[shift] || []).forEach((it) => {
+          const itemKey = `${shift}::${it.code || it.rawLabel}`;
+          const rec = st.itemPerCapita[itemKey];
+          if (rec && rec.count > 0) {
+            const avgGrams = rec.gramsSum / rec.count;
+            const suggestedKg = Number(((avgGrams * guests) / 1000).toFixed(2));
+            it.qty = suggestedKg;
+            updatedItems++;
+          }
+        });
+      });
+
+      if (updatedItems === 0) {
+        showToast('Nenhuma proteína deste dia tinha histórico com hóspedes preenchidos.', 'warning');
+        return;
+      }
+
+      saveState();
+      renderLancamentoView();
+      showToast(`Quantidades sugeridas aplicadas em ${updatedItems} itens com base no histórico!`);
     }
 
     function populateAddItemDropdown() {
@@ -1758,6 +2039,16 @@
       saveState();
     }
 
+    function applyQuickCutChip(shift, index, chipLabel) {
+      const dayObj = ensureDayStructure(state.activeDay);
+      if (!dayObj[shift][index]) return;
+      const current = (dayObj[shift][index].note || '').trim();
+      const nextVal = current.toLowerCase() === chipLabel.toLowerCase() ? '' : (chipLabel === 'Padrão' ? '' : chipLabel);
+      dayObj[shift][index].note = nextVal;
+      saveState();
+      renderDayItems();
+    }
+
     function removeChecklistItem(shift, index) {
       const dayObj = ensureDayStructure(state.activeDay);
       if (!dayObj[shift][index]) return;
@@ -1789,6 +2080,59 @@
       const badge = document.getElementById('current-day-items-badge');
       if (badge) {
         badge.textContent = `${almocoList.length + jantarList.length} itens no dia (${almocoList.length} Almoço • ${jantarList.length} Jantar)`;
+      }
+
+      const guestsAlmoco = Number(dayObj.guests?.ALMOCO) || 0;
+      const guestsJantar = Number(dayObj.guests?.JANTAR) || 0;
+      const pcActualEl = document.getElementById('day-percapita-actual');
+      const pcHintEl = document.getElementById('day-percapita-history-hint');
+      const btnSuggest = document.getElementById('btn-apply-history-percapita');
+
+      if (pcActualEl) {
+        const parts = [];
+        if (guestsAlmoco > 0) {
+          const gA = (almocoSum * 1000) / guestsAlmoco;
+          parts.push(`Almoço: ${formatNumberBR(gA, 0)} g/hósp.`);
+        }
+        if (guestsJantar > 0) {
+          const gJ = (jantarSum * 1000) / guestsJantar;
+          parts.push(`Jantar: ${formatNumberBR(gJ, 0)} g/hósp.`);
+        }
+        if (parts.length > 0) {
+          const maxG = Math.max(
+            guestsAlmoco > 0 ? (almocoSum * 1000) / guestsAlmoco : 0,
+            guestsJantar > 0 ? (jantarSum * 1000) / guestsJantar : 0
+          );
+          const alertHigh = maxG > 650 ? ' ⚠️ (atenção: acima de 650g!)' : '';
+          pcActualEl.textContent = `Per capita atual: ${parts.join(' • ')}${alertHigh}`;
+          pcActualEl.className = maxG > 650 ? 'font-extrabold text-amber-300' : 'font-semibold text-emerald-200';
+        } else {
+          pcActualEl.textContent = 'Per capita atual: informe os hóspedes acima';
+          pcActualEl.className = 'font-semibold text-amber-200';
+        }
+      }
+
+      const { dayStats } = computeHistoricalPerCapitaStats();
+      const st = dayStats[state.activeDay];
+      if (pcHintEl && btnSuggest) {
+        if (st && st.samples > 0) {
+          const histParts = [];
+          if (st.almocoSamples > 0) {
+            histParts.push(`Alm. ${formatNumberBR(st.almocoGramsPerGuestSum / st.almocoSamples, 0)}g`);
+          }
+          if (st.jantarSamples > 0) {
+            histParts.push(`Jan. ${formatNumberBR(st.jantarGramsPerGuestSum / st.jantarSamples, 0)}g`);
+          }
+          pcHintEl.textContent = `Média histórica (${st.samples} sem.): ${histParts.join(' • ')} / hóspede`;
+          if (guestsAlmoco > 0 || guestsJantar > 0) {
+            btnSuggest.classList.remove('hidden');
+          } else {
+            btnSuggest.classList.add('hidden');
+          }
+        } else {
+          pcHintEl.textContent = 'Base histórica: arquive semanas para calcular per capita média';
+          btnSuggest.classList.add('hidden');
+        }
       }
 
       const dayUnmapped = [...almocoList, ...jantarList].filter((i) => !i.code || !findCatalogItem(i.code)).length;
@@ -1949,14 +2293,32 @@
                           </div>
                         </td>
 
-                        <td class="py-3 px-3 sm:px-4 align-top min-w-[165px]">
+                        <td class="py-3 px-3 sm:px-4 align-top min-w-[210px]">
                           <input
+                            id="note-input-${shift}-${idx}"
                             type="text"
                             value="${escapeHtml(item.note || '')}"
                             placeholder="Obs. corte / preparo..."
                             oninput="updateChecklistItemNote('${shift}', ${idx}, this.value)"
-                            class="w-full px-2.5 py-2 rounded-xl border border-madeira-200 bg-madeira-50/70 focus:bg-white text-xs text-madeira-800 focus:outline-none focus:ring-2 focus:ring-terracotta-500"
+                            class="w-full px-2.5 py-1.5 rounded-xl border border-madeira-200 bg-madeira-50/70 focus:bg-white text-xs text-madeira-800 focus:outline-none focus:ring-2 focus:ring-terracotta-500"
                           />
+                          <div class="mt-1.5 flex flex-wrap gap-1">
+                            ${QUICK_CUT_CHIPS.map(
+                              (chip) => `
+                                <button
+                                  type="button"
+                                  onclick="applyQuickCutChip('${shift}', ${idx}, '${chip}')"
+                                  class="px-1.5 py-0.5 rounded-md text-[10px] font-semibold border transition cursor-pointer ${
+                                    (item.note || '').trim().toLowerCase() === chip.toLowerCase()
+                                      ? 'bg-vinho-800 text-white border-vinho-900'
+                                      : 'bg-madeira-100 hover:bg-terracotta-100 text-madeira-700 border-madeira-200'
+                                  }"
+                                >
+                                  ${chip}
+                                </button>
+                              `
+                            ).join('')}
+                          </div>
                         </td>
 
                         <td class="py-3 px-3 sm:px-4 align-top text-right">
@@ -2196,7 +2558,7 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="9" class="py-10 px-4 text-center text-madeira-500">
+            <td colspan="10" class="py-10 px-4 text-center text-madeira-500">
               Nenhuma quantidade lançada para os filtros selecionados. Preencha as quantidades na aba <strong>1. Lançamento Dia / Turno</strong>.
             </td>
           </tr>
@@ -2235,6 +2597,7 @@
               <td class="py-2 px-2 text-right font-medium text-madeira-800 whitespace-nowrap">${formatNumberBR(r.jantar)}</td>
               <td class="py-2 px-2 text-right font-extrabold text-vinho-900 whitespace-nowrap">${formatNumberBR(r.total)}</td>
               <td class="py-2 px-2 text-center text-xs font-bold text-madeira-700 whitespace-nowrap">${escapeHtml(r.unit)}</td>
+              <td class="py-2 px-2 text-xs font-semibold text-madeira-700 whitespace-nowrap">${escapeHtml(formatBoxConversion(r.description, r.total, r.unit))}</td>
               <td class="py-2 px-2 text-xs text-madeira-600">${escapeHtml(daysText)}</td>
             </tr>
           `;
@@ -2243,10 +2606,210 @@
     }
 
     function triggerPrintReport() {
-      document.body.classList.remove('printing-daily');
+      document.body.classList.remove('printing-daily', 'printing-weekly-butcher');
       renderConsolidado();
       setTimeout(() => {
         window.print();
+      }, 120);
+    }
+
+    function triggerPrintWeeklyButcherGuide() {
+      const sheet = document.getElementById('weekly-butcher-sheet');
+      if (!sheet) return;
+
+      const selectedDays = DAYS_CONFIG.filter((d) => state.consolidadoDays.includes(d.key));
+      if (selectedDays.length === 0) {
+        showToast('Selecione ao menos um dia da semana antes de imprimir o Guia do Açougue.', 'warning');
+        return;
+      }
+
+      let grandTotalKg = 0;
+      const cutSummaryMap = new Map();
+      const dayBlocks = [];
+
+      selectedDays.forEach((d) => {
+        const dayObj = ensureDayStructure(d.key);
+        const almocoItems = (dayObj.ALMOCO || []).filter((i) => parseQtyInput(i.qty) > 0);
+        const jantarItems = (dayObj.JANTAR || []).filter((i) => parseQtyInput(i.qty) > 0);
+
+        if (almocoItems.length === 0 && jantarItems.length === 0) return;
+
+        const dayTotal = [...almocoItems, ...jantarItems].reduce((s, i) => s + parseQtyInput(i.qty), 0);
+        grandTotalKg += dayTotal;
+
+        const collectItemRow = (shiftLabel, item) => {
+          const catItem = findCatalogItem(item.code);
+          const unitLabel = catItem ? catItem.unit : 'KG';
+          const qty = parseQtyInput(item.qty);
+          const proteinName = item.rawLabel || (catItem ? catItem.description : 'Item');
+          const cutNote = (item.note || '').trim() || 'Padrão';
+
+          // Agrupador semanal por Proteína + Tipo de Corte
+          const summaryKey = `${proteinName.toLowerCase()}::${cutNote.toLowerCase()}`;
+          if (!cutSummaryMap.has(summaryKey)) {
+            cutSummaryMap.set(summaryKey, {
+              code: item.code || 'S/CÓD',
+              protein: proteinName,
+              cut: cutNote,
+              unit: unitLabel,
+              total: 0
+            });
+          }
+          cutSummaryMap.get(summaryKey).total += qty;
+
+          return `
+            <tr>
+              <td class="py-1.5 px-2 text-center w-8">
+                <span class="inline-block w-3 h-3 border border-slate-700 rounded-xs"></span>
+              </td>
+              <td class="py-1.5 px-2 font-bold text-slate-700 whitespace-nowrap w-20">${shiftLabel}</td>
+              <td class="py-1.5 px-2 font-mono font-bold text-slate-900 whitespace-nowrap w-20">${escapeHtml(item.code || 'S/CÓD')}</td>
+              <td class="py-1.5 px-2 font-semibold text-slate-900">${escapeHtml(proteinName)}</td>
+              <td class="py-1.5 px-2">
+                <span class="${
+                  cutNote !== 'Padrão'
+                    ? 'font-extrabold text-vinho-900 bg-vinho-50 border border-vinho-300 rounded px-1.5 py-0.5 text-[11px]'
+                    : 'text-slate-600 text-[11px]'
+                }">${escapeHtml(cutNote)}</span>
+              </td>
+              <td class="py-1.5 px-2 text-right font-extrabold text-slate-900 whitespace-nowrap w-24">
+                ${formatNumberBR(qty)} ${escapeHtml(unitLabel)}
+              </td>
+            </tr>
+          `;
+        };
+
+        const rowsHtml = [
+          ...almocoItems.map((i) => collectItemRow('ALMOÇO', i)),
+          ...jantarItems.map((i) => collectItemRow('JANTAR', i))
+        ].join('');
+
+        dayBlocks.push(`
+          <div class="butcher-day-block mb-4">
+            <div class="flex items-center justify-between bg-slate-800 text-white px-3 py-1.5 rounded-t-md">
+              <span class="font-extrabold text-xs uppercase tracking-wider">${escapeHtml(d.label)}</span>
+              <span class="text-xs font-bold">Total do Dia: ${formatNumberBR(dayTotal)} KG</span>
+            </div>
+            <table class="w-full text-left border-collapse border border-slate-300">
+              <thead>
+                <tr class="bg-slate-100 border-b border-slate-300 text-[10px] font-extrabold uppercase text-slate-700">
+                  <th class="py-1.5 px-2 text-center w-8">OK</th>
+                  <th class="py-1.5 px-2 w-20">Turno</th>
+                  <th class="py-1.5 px-2 w-20">Cód.</th>
+                  <th class="py-1.5 px-2">Proteína</th>
+                  <th class="py-1.5 px-2">Corte / Preparo</th>
+                  <th class="py-1.5 px-2 text-right w-24">Peso</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 text-xs">
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        `);
+      });
+
+      if (dayBlocks.length === 0) {
+        showToast('Nenhuma quantidade lançada nos dias selecionados para gerar o Guia do Açougue.', 'warning');
+        return;
+      }
+
+      const summaryList = Array.from(cutSummaryMap.values()).sort((a, b) =>
+        a.protein.localeCompare(b.protein, 'pt-BR')
+      );
+
+      const summaryRowsHtml = summaryList
+        .map(
+          (s) => `
+          <tr>
+            <td class="py-1.5 px-2 text-center w-8">
+              <span class="inline-block w-3 h-3 border border-slate-700 rounded-xs"></span>
+            </td>
+            <td class="py-1.5 px-2 font-mono font-bold text-slate-900 whitespace-nowrap w-20">${escapeHtml(s.code)}</td>
+            <td class="py-1.5 px-2 font-bold text-slate-900">${escapeHtml(s.protein)}</td>
+            <td class="py-1.5 px-2">
+              <span class="${
+                s.cut !== 'Padrão'
+                  ? 'font-extrabold text-vinho-900 bg-vinho-50 border border-vinho-300 rounded px-1.5 py-0.5 text-[11px]'
+                  : 'text-slate-600 text-[11px]'
+              }">${escapeHtml(s.cut)}</span>
+            </td>
+            <td class="py-1.5 px-2 text-right font-extrabold text-vinho-900 whitespace-nowrap w-28">
+              ${formatNumberBR(s.total)} ${escapeHtml(s.unit)}
+            </td>
+          </tr>
+        `
+        )
+        .join('');
+
+      sheet.innerHTML = `
+        <div class="flex items-center justify-between gap-4 pb-3 mb-4 border-b-2 border-[#00463f]">
+          <div class="flex items-center gap-3">
+            <img src="./logo.png" alt="Logo" class="h-14 w-auto object-contain" onerror="this.style.display='none'" />
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-widest text-terracotta-700">Ordem Semanal de Produção — Açougue</p>
+              <h2 class="text-xl font-extrabold text-vinho-900">Guia Semanal de Cortes e Descongelo</h2>
+              <p class="text-xs text-slate-600">${escapeHtml(state.weekReference || '')} (${selectedDays.map((d) => d.short).join(', ')})</p>
+            </div>
+          </div>
+          <div class="text-right text-xs text-slate-700 space-y-0.5">
+            <div><strong>Emissão:</strong> ${new Date().toLocaleString('pt-BR')}</div>
+            <div><strong>Volume Total:</strong> <span class="font-extrabold text-vinho-900">${formatNumberBR(grandTotalKg)} KG</span></div>
+          </div>
+        </div>
+
+        <div class="butcher-day-block mb-5">
+          <div class="flex items-center justify-between bg-[#00463f] text-white px-3 py-1.5 rounded-t-md">
+            <span class="font-extrabold text-xs uppercase tracking-wider">1. Resumo Total por Proteína e Tipo de Corte (Descongelo / Preparo)</span>
+            <span class="text-xs font-bold">${summaryList.length} cortes</span>
+          </div>
+          <table class="w-full text-left border-collapse border border-slate-300">
+            <thead>
+              <tr class="bg-slate-100 border-b border-slate-300 text-[10px] font-extrabold uppercase text-slate-700">
+                <th class="py-1.5 px-2 text-center w-8">OK</th>
+                <th class="py-1.5 px-2 w-20">Cód.</th>
+                <th class="py-1.5 px-2">Proteína</th>
+                <th class="py-1.5 px-2">Corte / Preparo</th>
+                <th class="py-1.5 px-2 text-right w-28">Total Período</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-xs">
+              ${summaryRowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mb-2">
+          <p class="text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-2">2. Cronograma de Entrega por Dia e Turno</p>
+          ${dayBlocks.join('')}
+        </div>
+
+        <div class="print-signatures pt-5 mt-5 border-t border-slate-300 grid grid-cols-3 gap-6 text-xs text-slate-700">
+          <div>
+            <div class="border-b border-slate-400 h-7 mb-1"></div>
+            <p class="font-semibold text-slate-900">Chef de Cozinha</p>
+            <p class="text-[10px] text-slate-500">Aprovação do cronograma</p>
+          </div>
+          <div>
+            <div class="border-b border-slate-400 h-7 mb-1"></div>
+            <p class="font-semibold text-slate-900">Açougueiro Responsável</p>
+            <p class="text-[10px] text-slate-500">Separação, corte e etiquetagem</p>
+          </div>
+          <div>
+            <div class="border-b border-slate-400 h-7 mb-1"></div>
+            <p class="font-semibold text-slate-900">Conferência / Câmaras</p>
+            <p class="text-[10px] text-slate-500">Data e assinatura</p>
+          </div>
+        </div>
+      `;
+
+      document.body.classList.remove('printing-daily');
+      document.body.classList.add('printing-weekly-butcher');
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove('printing-weekly-butcher');
+        }, 500);
       }, 120);
     }
 
@@ -2373,6 +2936,7 @@
         </div>
       `;
 
+      document.body.classList.remove('printing-weekly-butcher');
       document.body.classList.add('printing-daily');
       setTimeout(() => {
         window.print();
@@ -2656,8 +3220,232 @@
      * 9. INICIALIZAÇÃO
      * =========================================================================
      */
+    function formatBoxConversion(description, totalQty, unit) {
+      if (unit !== 'KG' || totalQty <= 0) return '—';
+      const match = String(description || '').match(/(?:cx|pct)\s*([0-9]+(?:[.,][0-9]+)?)\s*kg/i);
+      if (!match) return 'Granel / Pç';
+      const boxWeight = parseFloat(match[1].replace(',', '.'));
+      if (!boxWeight || boxWeight <= 0) return '—';
+
+      const fullBoxes = Math.floor(totalQty / boxWeight);
+      const remainder = Number((totalQty - fullBoxes * boxWeight).toFixed(2));
+      const ceilBoxes = Math.ceil(totalQty / boxWeight);
+
+      if (remainder <= 0.05) {
+        return `${fullBoxes} cx (${formatNumberBR(fullBoxes * boxWeight, 0)} kg)`;
+      }
+      if (fullBoxes === 0) {
+        return `< 1 cx (${ceilBoxes} cx = ${formatNumberBR(ceilBoxes * boxWeight, 0)} kg)`;
+      }
+      return `${fullBoxes} cx + ${formatNumberBR(remainder)} kg (${ceilBoxes} cxs)`;
+    }
+
+    /**
+     * =========================================================================
+     * 8B. ABA 4 — HISTÓRICO DE SEMANAS & PER CAPITA AUTOMÁTICA (ITENS 2 E 5)
+     * =========================================================================
+     */
+    function openArchiveWeekModal() {
+      let totalKg = 0;
+      let totalGuests = 0;
+      DAYS_CONFIG.forEach((d) => {
+        const dObj = ensureDayStructure(d.key);
+        totalGuests += (Number(dObj.guests?.ALMOCO) || 0) + (Number(dObj.guests?.JANTAR) || 0);
+        ['ALMOCO', 'JANTAR'].forEach((shift) => {
+          totalKg += (dObj[shift] || []).reduce((s, it) => s + parseQtyInput(it.qty), 0);
+        });
+      });
+
+      const suggestedNextLabel = `Semana ${String((state.history || []).length + 2).padStart(2, '0')} — Cozinha & Açougue`;
+
+      openModal(`
+        <div>
+          <h3 class="text-lg font-extrabold text-vinho-900">Arquivar Semana Atual &amp; Iniciar Nova</h3>
+          <p class="text-xs text-madeira-600 mt-1">
+            Salva uma fotografia completa desta semana no banco de dados (<strong>${formatNumberBR(totalKg)} KG</strong> e <strong>${formatNumberBR(totalGuests, 0)} hóspedes</strong>) para alimentar a média de per capita e zera as quantidades para a próxima semana.
+          </p>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-madeira-800 mb-1">Nome da Semana que está sendo encerrada *</label>
+            <input id="archive-current-label" type="text" value="${escapeHtml(state.weekReference || 'Semana Encerrada')}" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm font-semibold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-madeira-800 mb-1">Título da Nova Semana *</label>
+            <input id="archive-next-label" type="text" value="${escapeHtml(suggestedNextLabel)}" class="w-full px-3 py-2 rounded-xl border border-madeira-300 text-sm" />
+          </div>
+          <label class="inline-flex items-center gap-2 text-xs font-medium text-madeira-800 cursor-pointer">
+            <input id="archive-zero-quantities" type="checkbox" checked class="rounded border-madeira-400 text-vinho-800" />
+            Zerar quantidades e hóspedes para iniciar a nova semana limpa
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-madeira-100 hover:bg-madeira-200 text-madeira-800 cursor-pointer">
+            Cancelar
+          </button>
+          <button type="button" onclick="confirmArchiveWeek()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-vinho-800 hover:bg-vinho-900 text-white cursor-pointer">
+            Arquivar &amp; Salvar
+          </button>
+        </div>
+      `);
+    }
+
+    function confirmArchiveWeek() {
+      const closedLabel = document.getElementById('archive-current-label').value.trim() || 'Semana Arquivada';
+      const nextLabel = document.getElementById('archive-next-label').value.trim() || 'Nova Semana';
+      const shouldZero = document.getElementById('archive-zero-quantities').checked;
+
+      let totalKg = 0;
+      let totalGuests = 0;
+      DAYS_CONFIG.forEach((d) => {
+        const dObj = ensureDayStructure(d.key);
+        totalGuests += (Number(dObj.guests?.ALMOCO) || 0) + (Number(dObj.guests?.JANTAR) || 0);
+        ['ALMOCO', 'JANTAR'].forEach((shift) => {
+          totalKg += (dObj[shift] || []).reduce((s, it) => s + parseQtyInput(it.qty), 0);
+        });
+      });
+
+      if (!Array.isArray(state.history)) state.history = [];
+      state.history.unshift({
+        id: 'hist_' + Date.now(),
+        label: closedLabel,
+        archivedAt: new Date().toISOString(),
+        totalKg: Number(totalKg.toFixed(2)),
+        totalGuests: totalGuests,
+        checklist: JSON.parse(JSON.stringify(state.checklist))
+      });
+
+      state.weekReference = nextLabel;
+
+      if (shouldZero) {
+        DAYS_CONFIG.forEach((d) => {
+          const dObj = ensureDayStructure(d.key);
+          dObj.guests = { ALMOCO: 0, JANTAR: 0 };
+          ['ALMOCO', 'JANTAR'].forEach((shift) => {
+            (dObj[shift] || []).forEach((it) => {
+              it.qty = 0;
+            });
+          });
+        });
+      }
+
+      saveState();
+      closeModal();
+      renderAll();
+      showToast(`"${closedLabel}" arquivada no histórico! Per capita atualizada.`);
+    }
+
+    function restoreArchivedWeekToCurrent(histId) {
+      const entry = (state.history || []).find((h) => h.id === histId);
+      if (!entry || !entry.checklist) return;
+
+      state.checklist = JSON.parse(JSON.stringify(entry.checklist));
+      state.weekReference = `${entry.label} (Cópia)`;
+      saveState();
+      switchTab('lancamento');
+      showToast(`Pedido de "${entry.label}" carregado na programação atual!`);
+    }
+
+    function deleteArchivedWeek(histId) {
+      state.history = (state.history || []).filter((h) => h.id !== histId);
+      saveState();
+      renderHistoricoView();
+      showToast('Registro removido do histórico.');
+    }
+
+    function renderHistoricoView() {
+      updateHistoryCountBadge();
+      const history = Array.isArray(state.history) ? state.history : [];
+      const { dayStats, globalAvgGrams, totalWeeks } = computeHistoricalPerCapitaStats();
+
+      document.getElementById('hist-kpi-weeks').textContent = totalWeeks;
+      document.getElementById('hist-kpi-global-pc').textContent =
+        globalAvgGrams > 0 ? `${formatNumberBR(globalAvgGrams, 0)} g/hóspede` : '— g/hóspede';
+      document.getElementById('hist-kpi-status').textContent =
+        globalAvgGrams > 0
+          ? `Ativo (${totalWeeks} ${totalWeeks === 1 ? 'semana' : 'semanas'} na base)`
+          : 'Arquive a 1ª semana com hóspedes preenchidos para ativar sugestões.';
+
+      const pcTbody = document.getElementById('history-percapita-table-body');
+      pcTbody.innerHTML = DAYS_CONFIG.map((d) => {
+        const st = dayStats[d.key];
+        const avgA = st.almocoSamples > 0 ? `${formatNumberBR(st.almocoGramsPerGuestSum / st.almocoSamples, 0)} g` : '—';
+        const avgJ = st.jantarSamples > 0 ? `${formatNumberBR(st.jantarGramsPerGuestSum / st.jantarSamples, 0)} g` : '—';
+        const totalSamples = st.almocoSamples + st.jantarSamples;
+        const avgTotal =
+          totalSamples > 0
+            ? `${formatNumberBR((st.almocoGramsPerGuestSum + st.jantarGramsPerGuestSum) / totalSamples, 0)} g`
+            : '—';
+
+        return `
+          <tr class="hover:bg-madeira-50/70">
+            <td class="py-3 px-4 font-bold text-madeira-900">${escapeHtml(d.label)}</td>
+            <td class="py-3 px-4 text-right text-xs text-madeira-600">${st.samples} sem.</td>
+            <td class="py-3 px-4 text-right font-semibold text-amber-900">${avgA}</td>
+            <td class="py-3 px-4 text-right font-semibold text-vinho-900">${avgJ}</td>
+            <td class="py-3 px-4 text-right font-extrabold text-madeira-900">${avgTotal}</td>
+          </tr>
+        `;
+      }).join('');
+
+      const listContainer = document.getElementById('archived-weeks-list');
+      if (history.length === 0) {
+        listContainer.innerHTML = `
+          <div class="p-8 text-center text-sm text-madeira-500">
+            Nenhuma semana arquivada ainda. Quando encerrar o pedido da semana, clique em <strong>Arquivar Semana &amp; Nova</strong> no topo da página.
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = history
+        .map((h) => {
+          const dateStr = h.archivedAt ? new Date(h.archivedAt).toLocaleString('pt-BR') : '';
+          const pcStr =
+            h.totalGuests > 0 && h.totalKg > 0
+              ? `${formatNumberBR((h.totalKg * 1000) / h.totalGuests, 0)} g/hóspede`
+              : 'Sem hóspedes informados';
+
+          return `
+            <div class="p-4 sm:px-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-madeira-50/60">
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="font-extrabold text-madeira-900">${escapeHtml(h.label)}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-vinho-50 text-vinho-900 border border-vinho-200">
+                    ${formatNumberBR(h.totalKg)} KG
+                  </span>
+                  <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200">
+                    ${formatNumberBR(h.totalGuests, 0)} hóspedes (${pcStr})
+                  </span>
+                </div>
+                <p class="text-xs text-madeira-500 mt-1">Arquivada em: ${escapeHtml(dateStr)}</p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onclick="restoreArchivedWeekToCurrent('${escapeHtml(h.id)}')"
+                  class="px-3 py-1.5 rounded-xl text-xs font-bold bg-terracotta-50 hover:bg-terracotta-100 text-terracotta-900 border border-terracotta-200 cursor-pointer"
+                >
+                  Clonar p/ Semana Atual
+                </button>
+                <button
+                  type="button"
+                  onclick="deleteArchivedWeek('${escapeHtml(h.id)}')"
+                  class="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-red-700 hover:bg-red-50 border border-red-200 cursor-pointer"
+                  title="Excluir do histórico"
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
     function renderAll() {
       updateCatalogCountBadge();
+      updateHistoryCountBadge();
       updateUnmappedBadge();
       switchTab(state.activeTab || 'lancamento');
     }
